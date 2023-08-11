@@ -2,10 +2,22 @@
 using MigrationBot;
 using Npgsql;
 using MigrationBot.Data;
+using MigrationBot.Models;
 
-// CreateDateTables();
+//CreateDateTables();
+//
 // DropDateTables();
 
+var date = new DateOnly(2023, 8, 11);
+
+
+
+var lst = await TimeItem.GetFreeEntries(date);
+
+foreach (var entry in lst)
+{
+    Console.WriteLine(entry.Time);
+}
 
 while (true)
 {
@@ -52,7 +64,7 @@ static async void CreateDateTables()
         };
 
 
-        for (int j = 0; j < 115; j++)
+        for (int j = 0; j <= 90; j++)
         {
             var size = new TimeSpan(0, 5, 0);
 

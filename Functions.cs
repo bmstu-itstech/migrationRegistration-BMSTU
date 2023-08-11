@@ -1,4 +1,6 @@
-﻿using MigrationBot.Types;
+﻿using MigrationBot.Models;
+using MigrationBot.Types;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +28,32 @@ namespace MigrationBot
 
             return days;
         }
+        private static int GetServiceDuration(MyUser user)
+        {
+            int service_duration = 0;
+
+            if (user.Service == Services.VIZA)
+                service_duration = 25;
+            if (user.Service == Services.VIZA_INSURANCE)
+                service_duration = 30;
+            if (user.Service == Services.REGISTRATION)
+                service_duration = 15;
+            if (user.Service == Services.YEAR_REGISTRATION)
+                service_duration = 20;
+            if (user.Service == Services.INSURANCE)
+                service_duration = 5;
+            if (user.Service == Services.DOCUMENTS)
+                service_duration = 10;
+            if (user.Service == Services.ALL)
+                service_duration = 45;
+
+            return service_duration;
+        }
 
         public static InlineKeyboardMarkup GenerateEntryKeyBoard(MyUser user, int week_nuber)
         {
             int days = GetUserDays(user);
-            int totaldays_skipped = week_nuber * 7;
+            int totaldays_skipped = (week_nuber-1) * 7;
 
             DateOnly date = (DateOnly)user.ArrivalDate;
 
@@ -45,8 +68,7 @@ namespace MigrationBot
 
             for (int j = 0; j < 7; j++)
             {
-                if (days <= totaldays_skipped)
-                    break;
+                
 
                 List<InlineKeyboardButton> button = new List<InlineKeyboardButton>();
 
@@ -67,6 +89,8 @@ namespace MigrationBot
                 date = date.AddDays(1);
                 totaldays_skipped++;
 
+                if (days <= totaldays_skipped)
+                    break;
             }
 
             List<InlineKeyboardButton> buttons = new List<InlineKeyboardButton>();
@@ -88,5 +112,27 @@ namespace MigrationBot
 
             return new InlineKeyboardMarkup(keybord_buttnons);
         }
+        public static InlineKeyboardMarkup GenerateTimeSelectionKeuBoard(MyUser user,DateOnly selected_date, int time_number,int week_number)
+        {
+
+            // всего 450 минут  
+
+
+            return null;
+        }
+
+        public static List<TimeSpan> FindFreeSeqence(MyUser user,DateOnly selected_date)
+        {
+
+            
+
+            return new List<TimeSpan>();
+        }
+
+        private static bool IsTimeItemFree(MyUser user,TimeItem time_item)
+        {
+            return false;
+        }
+        
     }
 }
