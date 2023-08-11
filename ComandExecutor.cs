@@ -19,7 +19,7 @@ namespace MigrationBot
                 try
                 {
                     if (message == "/start") await Start(message, chatId, bot, user);
-                    if ((bool)(user?.Comand.Contains("Ask"))) await ExecuteSetters(message, chatId, bot, user);
+                    else if ((bool)(user?.Comand?.Contains("Ask"))) await ExecuteSetters(message, chatId, bot, user);
 
                 }
                 catch (Exception ex)
@@ -32,11 +32,11 @@ namespace MigrationBot
         private static async Task ExecuteSetters(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
 
-            if(user.Comand == "AskFioRu")
+            if (user.Comand == "AskFioRu")
             {
                 await AskFio_Ru(message, chatId, bot, user);
             }
-            if (user.Comand == "AskFioEn") 
+            else if (user.Comand == "AskFioEn")
             {
                 await AskFio_En(message, chatId, bot, user);
             }
@@ -49,17 +49,20 @@ namespace MigrationBot
 
             user.Comand = "AskFioRu";
 
-            await user.SaveUser();
+
+            await user.Save();
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioRu);
-            
+
         }
         private static async Task AskFio_Ru(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
             user.FioRu = message;
             user.Comand = "AskFioEn";
 
-            await user.SaveUser();
+
+
+            await user.Save();
 
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
@@ -67,9 +70,10 @@ namespace MigrationBot
         private static async Task AskFio_En(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
             user.FioEn = message;
-            user.Comand = "";
 
-            await user.SaveUser();
+            await user.Save();
+
+            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry,replyMarkup: Data.KeyBords.CountrySelection);
         }
     }
 }

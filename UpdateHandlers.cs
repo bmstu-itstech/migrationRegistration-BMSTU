@@ -51,6 +51,8 @@ namespace MigrationBot
                 {
 
                     await CallBackHandler(update, bot);
+
+                    await bot.DeleteMessageAsync(update.CallbackQuery.From.Id, update.CallbackQuery.Message.MessageId);
                 }
 
             }

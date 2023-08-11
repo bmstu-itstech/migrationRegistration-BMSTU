@@ -42,7 +42,6 @@ namespace MigrationBot
 
                             _ = Task.Run(() =>
                             {
-
                                 _ = UpdateHandlers.HandleUpdateAsync(update, bot);
                                 return Task.CompletedTask;
                             });

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace MigrationBot.Models
 
         }
 
-        public User ConvertToSqlUser()
+        private User ConvertToSqlUser()
         {
             return new User()
             {
@@ -46,21 +47,31 @@ namespace MigrationBot.Models
             };
         }
 
-        public Task SaveUser()
+        public Task Save()
         {
             return Task.Run(async () =>
             {
                 using (MigroBotContext db = new MigroBotContext())
                 {
-                    User user = this.ConvertToSqlUser();
+                    try
+                    {
+                        User user = this.ConvertToSqlUser();
 
-                    await db.Users.AddAsync(user);
+                        await db.Users.AddAsync(user);
 
-                    await db.SaveChangesAsync();
+                        await db.SaveChangesAsync();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        await this.UpdateUser();
+                        //Дубликат по записи 
+                      //  Console.WriteLine(ex);
+                    }
+                    
                 }
             });
         }
-        public Task UpdateUser()
+        private Task UpdateUser()
         {
             return Task.Run(async () =>
             {
@@ -68,7 +79,13 @@ namespace MigrationBot.Models
                 {
                     var user = db.Users.Where(x => x.ChatId == this.ChatId).FirstOrDefault();
 
-                    user = this.ConvertToSqlUser();
+                    user.ChatId = this.ChatId;
+                    user.Country = this.Country;
+                    user.Service = this.Service;
+                    user.Comand = this.Comand;
+                    user.Entry = this.Entry;
+                    user.FioEn = this.FioEn;
+                    user.FioRu = this.FioRu;
 
 
                     await db.SaveChangesAsync();
@@ -86,7 +103,7 @@ namespace MigrationBot.Models
                 {
                     var my_user = new MyUser();
 
-                    await my_user.SaveUser();
+                    await my_user.Save();
 
                     return my_user;
                 }
