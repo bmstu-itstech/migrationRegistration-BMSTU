@@ -1,4 +1,4 @@
-﻿using MigrationBot.Models;
+﻿using MigrationBot.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +40,10 @@ namespace MigrationBot
             {
                 await AskFio_En(message, chatId, bot, user);
             }
+            else if(user.Comand == "AskArivalDate")
+            {
+                await AskArivalDate(message, chatId, bot, user);
+            }
 
         }
 
@@ -49,6 +53,9 @@ namespace MigrationBot
 
             user.Comand = "AskFioRu";
 
+            var keybord = Functions.GenerateEntryKeyBoard(user,1);
+
+            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
 
             await user.Save();
 
@@ -60,10 +67,7 @@ namespace MigrationBot
             user.FioRu = message;
             user.Comand = "AskFioEn";
 
-
-
             await user.Save();
-
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
         }
@@ -74,6 +78,28 @@ namespace MigrationBot
             await user.Save();
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry,replyMarkup: Data.KeyBords.CountrySelection);
+        }
+        private static async Task AskArivalDate(string message, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            try
+            {
+                var arival_date = DateOnly.Parse(message);
+
+                //Дата прибытия не может быть раньше, чем сегодняшняя
+                if (arival_date < DateOnly.FromDateTime(DateTime.Now))
+                    throw new Exception();
+
+                user.ArrivalDate = arival_date;
+                await user.Save();
+
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection);
+
+
+            }
+            catch (Exception)
+            {
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.InputErorr);
+            }
         }
     }
 }

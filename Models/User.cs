@@ -18,4 +18,6 @@ public partial class User
     public long ChatId { get; set; }
 
     public string? FioRu { get; set; }
+
+    public DateOnly? ArrivalDate { get; set; }
 }

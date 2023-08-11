@@ -1,20 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using MigrationBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MigrationBot.Models
+namespace MigrationBot.Types
 {
     internal class MyUser
     {
         public string? FioEn { get; set; }
 
-        public int? Country { get; set; }
+        public Enums.Countries Country { get; set; }
 
-        public int? Service { get; set; }
+        public Enums.Services Service { get; set; }
 
         public string? Comand { get; set; }
 
@@ -24,9 +25,11 @@ namespace MigrationBot.Models
 
         public string? FioRu { get; set; }
 
+        public DateOnly? ArrivalDate { get; set; }
+
         public MyUser(long chatId)
         {
-            this.ChatId = chatId;
+            ChatId = chatId;
         }
         public MyUser()
         {
@@ -37,13 +40,14 @@ namespace MigrationBot.Models
         {
             return new User()
             {
-                ChatId = this.ChatId,
-                Country = this.Country,
-                Service = this.Service,
-                Comand = this.Comand,
-                Entry = this.Entry,
-                FioEn = this.FioEn,
-                FioRu = this.FioRu
+                ChatId = ChatId,
+                Country = (int?)Country,
+                Service = (int?)Service,
+                Comand = Comand,
+                Entry = Entry,
+                FioEn = FioEn,
+                FioRu = FioRu,
+                ArrivalDate = ArrivalDate
             };
         }
 
@@ -55,19 +59,18 @@ namespace MigrationBot.Models
                 {
                     try
                     {
-                        User user = this.ConvertToSqlUser();
+                        User user = ConvertToSqlUser();
 
                         await db.Users.AddAsync(user);
 
                         await db.SaveChangesAsync();
                     }
-                    catch (DbUpdateException ex)
+                    catch (DbUpdateException)
                     {
-                        await this.UpdateUser();
-                        //Дубликат по записи 
-                      //  Console.WriteLine(ex);
+                        await UpdateUser();
+
                     }
-                    
+
                 }
             });
         }
@@ -77,16 +80,16 @@ namespace MigrationBot.Models
             {
                 using (MigroBotContext db = new MigroBotContext())
                 {
-                    var user = db.Users.Where(x => x.ChatId == this.ChatId).FirstOrDefault();
+                    var user = db.Users.Where(x => x.ChatId == ChatId).FirstOrDefault();
 
-                    user.ChatId = this.ChatId;
-                    user.Country = this.Country;
-                    user.Service = this.Service;
-                    user.Comand = this.Comand;
-                    user.Entry = this.Entry;
-                    user.FioEn = this.FioEn;
-                    user.FioRu = this.FioRu;
-
+                    user.ChatId = ChatId;
+                    user.Country = (int?)Country;
+                    user.Service = (int?)Service;
+                    user.Comand = Comand;
+                    user.Entry = Entry;
+                    user.FioEn = FioEn;
+                    user.FioRu = FioRu;
+                    user.ArrivalDate = ArrivalDate;
 
                     await db.SaveChangesAsync();
                 }
@@ -101,13 +104,13 @@ namespace MigrationBot.Models
 
                 if (user == null)
                 {
-                    var my_user = new MyUser();
+                    var my_user = new MyUser(chatId);
 
                     await my_user.Save();
 
                     return my_user;
                 }
-                  
+
 
                 return new MyUser()
                 {
@@ -115,9 +118,10 @@ namespace MigrationBot.Models
                     FioEn = user.FioEn,
                     FioRu = user.FioRu,
                     Comand = user.Comand,
-                    Country = user.Country,
-                    Service = user.Service,
+                    Country = (Enums.Countries)user.Country,
+                    Service = (Enums.Services)user.Service,
                     Entry = user.Entry,
+                    ArrivalDate = user.ArrivalDate
                 };
             }
         }

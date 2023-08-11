@@ -18,9 +18,7 @@ public partial class MigroBotContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-              => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
-
+        => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +31,7 @@ public partial class MigroBotContext : DbContext
             entity.Property(e => e.ChatId)
                 .ValueGeneratedNever()
                 .HasColumnName("chatId");
+            entity.Property(e => e.ArrivalDate).HasColumnName("arrival_date");
             entity.Property(e => e.Comand)
                 .HasMaxLength(255)
                 .HasColumnName("comand");
