@@ -1,4 +1,5 @@
-﻿using MigrationBot.Types;
+﻿using MigrationBot.Models;
+using MigrationBot.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,14 +18,14 @@ namespace MigrationBot
             bool change_flag = query.Contains("change:true");
             try
             {
-                if (query.Contains("setCountry")) await SetCountry(query, chatId, bot, user,change_flag);
+                if (query.Contains("setCountry")) await SetCountry(query, chatId, bot, user, change_flag);
                 else if (query.Contains("setService")) await SetService(query, chatId, bot, user, change_flag);
                 else if (query.Contains("DateSelection")) await SelectDate(query, chatId, bot, user, change_flag);
                 else if (query.Contains("SelectDate")) await SelectHour(query, chatId, bot, user, change_flag);
                 else if (query.Contains("SelectHour")) await SelectTime(query, chatId, bot, user, change_flag);
                 else if (query.Contains("SelectTime")) await SetUserEntry(query, chatId, bot, user, change_flag);
-                else if (query.Contains("Change")) await Changers(query, chatId, bot, user);    
-
+                else if (query.Contains("Change")) await Changers(query, chatId, bot, user);
+                else if (query == "Registration_End") await ProveRegistration(query, chatId, bot, user);
 
             }
             catch (Exception ex)
@@ -121,6 +122,19 @@ namespace MigrationBot
 
         }
         
+        private static async Task ProveRegistration(string query, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            var entry = new MyEntry()
+            {
+                UserId = chatId,
+                Date = (DateTime)user.Entry,
+            };
+
+           await entry.Add();
+
+
+        }
+
         internal static async Task EndReg(long chatId, TelegramBotClient bot, MyUser user)
         {
             user.Comand = "";
