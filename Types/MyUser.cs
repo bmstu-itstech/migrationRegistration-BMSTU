@@ -126,5 +126,13 @@ namespace MigrationBot.Types
             }
         }
 
+        public async Task Enroll()
+        {
+
+        }
+        public async Task UnEnroll()
+        {
+
+        }
     }
 }

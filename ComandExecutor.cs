@@ -20,6 +20,7 @@ namespace MigrationBot
                 {
                     if (message == "/start") await Start(message, chatId, bot, user);
                     else if ((bool)(user?.Comand?.Contains("Ask"))) await ExecuteSetters(message, chatId, bot, user);
+                    else if (user.Comand.Contains("Change")) await ExecuteChangers(message, chatId, bot, user);
 
                 }
                 catch (Exception ex)
@@ -40,44 +41,67 @@ namespace MigrationBot
             {
                 await AskFio_En(message, chatId, bot, user);
             }
-            else if(user.Comand == "AskArivalDate")
+            else if (user.Comand == "AskArivalDate")
             {
                 await AskArivalDate(message, chatId, bot, user);
             }
 
+        }
+        private static async Task ExecuteChangers(string message, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            if (user.Comand == "ChangeFioRu")
+            {
+                await AskFio_Ru(message, chatId, bot, user, true);
+            }
+            else if (user.Comand == "ChangeFioEn")
+            {
+                await AskFio_En(message, chatId, bot, user, true);
+            }
+            else if (user.Comand == "ChangeArivalDate")
+            {
+                await AskArivalDate(message, chatId, bot, user, true);
+            }
         }
 
         private static async Task Start(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
 
-            user.Comand = "AskFioRu";
 
-          
 
             await user.Save();
 
+            user.Comand = "AskFioRu";
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioRu);
 
         }
-        private static async Task AskFio_Ru(string message, long chatId, TelegramBotClient bot, MyUser user)
+        internal static async Task AskFio_Ru(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
             user.FioRu = message;
             user.Comand = "AskFioEn";
 
             await user.Save();
 
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
+            if (edit_flag)
+               await QueryExecutor.EndReg(chatId, bot, user);
+            else
+            {
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
+
+            }
         }
-        private static async Task AskFio_En(string message, long chatId, TelegramBotClient bot, MyUser user)
+        internal static async Task AskFio_En(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
             user.FioEn = message;
 
             await user.Save();
 
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry,replyMarkup: Data.KeyBords.CountrySelection);
+            if (edit_flag)
+                await QueryExecutor.EndReg(chatId, bot, user);
+            else
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection);
         }
-        private static async Task AskArivalDate(string message, long chatId, TelegramBotClient bot, MyUser user)
+        internal static async Task AskArivalDate(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
             try
             {
@@ -88,9 +112,17 @@ namespace MigrationBot
                     throw new Exception();
 
                 user.ArrivalDate = arival_date;
+                user.Comand = "";
                 await user.Save();
 
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection);
+                if (edit_flag)
+                {
+                    var keybord = Functions.GenerateDateKeyBoard(user, 1);
+
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+                }    
+                else
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection);
 
 
             }

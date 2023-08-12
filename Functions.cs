@@ -130,7 +130,7 @@ namespace MigrationBot
             {
                 List<InlineKeyboardButton> button = new List<InlineKeyboardButton>
                 {
-                    InlineKeyboardButton.WithCallbackData(time.ToString(@"hh\:mm"), $"SelectTime {time.ToString()}")
+                    InlineKeyboardButton.WithCallbackData(time.ToString(@"hh\:mm"), $"SelectTime {selected_date} {time.ToString()}")
                 };
 
                 keyboard.Add(button);
@@ -144,11 +144,11 @@ namespace MigrationBot
 
             return new InlineKeyboardMarkup(keyboard);
 
-    }
-    public static InlineKeyboardMarkup GenerateHourSelectionKeyBoard(DateOnly selected_date, int week_number)
-    {
-        InlineKeyboardMarkup TimeSelection = new InlineKeyboardMarkup(new[]
+        }
+        public static InlineKeyboardMarkup GenerateHourSelectionKeyBoard(DateOnly selected_date, int week_number)
         {
+            InlineKeyboardMarkup TimeSelection = new InlineKeyboardMarkup(new[]
+            {
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData("10:00",$"SelectHour 10:00 {selected_date} {week_number}")
@@ -187,62 +187,54 @@ namespace MigrationBot
                 }
             });
 
-        return TimeSelection;
-    }
-
-    private static async Task<List<TimeSpan>> FindFreeSeqence(MyUser user, DateOnly selected_date)
-    {
-
-        int service_duration = GetServiceDuration(user);
-        List<TimeSpan> free_times = new List<TimeSpan>();
-        // Смотрим, сколько временных юнитов нужно для данного мигранта 
-        // Именно такой длины должна быть последовательность юнитов
-        int time_block = service_duration / 5;
-
-        var free_entries = await TimeItem.GetFreeEntries(selected_date);
-
-        // Цикл выделения подходящийх временных отрезков 
-        for (int i = 1; i <= 90; i++)
-        {
-
-            if (!free_entries.Keys.Contains(i))
-                continue;
-
-            bool curr_entry_flag = true;
-
-            for (int j = i + 1; j < i + time_block; j++)
-            {
-                curr_entry_flag = free_entries.Keys.Contains(j);
-
-                if (!curr_entry_flag)
-                {
-                    break;
-                }
-            }
-
-
-
-            if (curr_entry_flag)
-            {
-                free_times.Add(TimeSpan.Parse(free_entries[i].Time));
-                //если последовательность подходит, подэлементы не нужно проверять 
-
-              //  i += time_block - 1;
-                //// цикл загрузки временного отрезка очередным мигрантом 
-                //for (int k = i; k < i + time_block; k++)
-                //{
-                //    await free_entries[k].AddWorkLoad(selected_date);
-                //}
-
-
-
-            }
-
+            return TimeSelection;
         }
 
+        private static async Task<List<TimeSpan>> FindFreeSeqence(MyUser user, DateOnly selected_date)
+        {
 
-        return free_times;
+            int service_duration = GetServiceDuration(user);
+            List<TimeSpan> free_times = new List<TimeSpan>();
+
+            // Смотрим, сколько временных юнитов нужно для данного мигранта 
+            // Именно такой длины должна быть последовательность юнитов
+            int time_block = service_duration / 5;
+
+            var free_entries = await TimeUnit.GetFreeEntries(selected_date);
+
+            // Цикл выделения подходящийх временных отрезков 
+            for (int i = 1; i <= 90; i++)
+            {
+
+                if (!free_entries.Keys.Contains(i))
+                    continue;
+
+                bool curr_entry_flag = true;
+
+                for (int j = i + 1; j < i + time_block; j++)
+                {
+                    curr_entry_flag = free_entries.Keys.Contains(j);
+
+                    if (!curr_entry_flag)
+                    {
+                        break;
+                    }
+                }
+
+                if (curr_entry_flag)
+                    free_times.Add(TimeSpan.Parse(free_entries[i].Time));
+
+
+            }
+
+            return free_times;
+        }
+
+        public static async Task Enroll(MyUser user,DateOnly selected_date,TimeSpan selected_time)
+        {
+            
+
+            
+        }
     }
-
-}
 }
