@@ -50,25 +50,25 @@ namespace MigrationBot
             return service_duration;
         }
 
-        public static InlineKeyboardMarkup GenerateEntryKeyBoard(MyUser user, int week_nuber)
+        public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number)
         {
             int days = GetUserDays(user);
-            int totaldays_skipped = (week_nuber-1) * 7;
+            int totaldays_skipped = (week_number - 1) * 7;
 
             DateOnly date = (DateOnly)user.ArrivalDate;
 
-            date = date.AddDays((week_nuber - 1) * 7);
+            date = date.AddDays((week_number - 1) * 7);
 
-            
 
-            var next = InlineKeyboardButton.WithCallbackData("➡️ Далее ➡️", $"DateSelection {week_nuber + 1}");
-            var back = InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"DateSelection {week_nuber - 1}");
+
+            var next = InlineKeyboardButton.WithCallbackData("➡️ Далее ➡️", $"DateSelection {week_number + 1}");
+            var back = InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"DateSelection {week_number - 1}");
 
             List<List<InlineKeyboardButton>> keybord_buttnons = new List<List<InlineKeyboardButton>>();
 
             for (int j = 0; j < 7; j++)
             {
-                
+
 
                 List<InlineKeyboardButton> button = new List<InlineKeyboardButton>();
 
@@ -81,7 +81,7 @@ namespace MigrationBot
                 if (!(date.Month >= 10) && date.Day >= 10)
                     curr_date = $"{date.Day}.0{date.Month}";
 
-                button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date}"));
+                button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date} {week_number}"));
                 keybord_buttnons.Add(button);
 
 
@@ -96,7 +96,7 @@ namespace MigrationBot
             List<InlineKeyboardButton> buttons = new List<InlineKeyboardButton>();
 
             bool can_go_next = days - totaldays_skipped > 0 ? true : false;
-            bool can_go_back = week_nuber > 1 ? true : false;
+            bool can_go_back = week_number > 1 ? true : false;
 
             if (can_go_back)
             {
@@ -107,32 +107,142 @@ namespace MigrationBot
             {
                 buttons.Add(next);
             }
-           
+
             keybord_buttnons.Add(buttons);
 
             return new InlineKeyboardMarkup(keybord_buttnons);
         }
-        public static InlineKeyboardMarkup GenerateTimeSelectionKeuBoard(MyUser user,DateOnly selected_date, int time_number,int week_number)
+        public static async Task<InlineKeyboardMarkup> GenerateTimeSelectionKeuBoard(MyUser user, DateOnly selected_date, TimeSpan selected_hour, int week_number)
         {
+            var free_times = await FindFreeSeqence(user, selected_date);
+            var free_times_in_hour = new List<TimeSpan>();
 
-            // всего 450 минут  
+            foreach (var time in free_times)
+            {
+                //Выбираем только те временные промежутки, которые находятся в интересующем нас часе
+                if (time >= selected_hour && time < selected_hour.Add(new TimeSpan(1, 0, 0)))
+                    free_times_in_hour.Add(time);
+            }
 
+            List<List<InlineKeyboardButton>> keyboard = new List<List<InlineKeyboardButton>>();
 
-            return null;
-        }
+            foreach (var time in free_times_in_hour)
+            {
+                List<InlineKeyboardButton> button = new List<InlineKeyboardButton>
+                {
+                    InlineKeyboardButton.WithCallbackData(time.ToString(@"hh\:mm"), $"SelectTime {time.ToString()}")
+                };
 
-        public static List<TimeSpan> FindFreeSeqence(MyUser user,DateOnly selected_date)
-        {
+                keyboard.Add(button);
+            }
 
-            
+            List<InlineKeyboardButton> back = new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"SelectDate {selected_date} {week_number}")
+            };
+            keyboard.Add(back);
 
-            return new List<TimeSpan>();
-        }
+            return new InlineKeyboardMarkup(keyboard);
 
-        private static bool IsTimeItemFree(MyUser user,TimeItem time_item)
-        {
-            return false;
-        }
-        
     }
+    public static InlineKeyboardMarkup GenerateHourSelectionKeyBoard(DateOnly selected_date, int week_number)
+    {
+        InlineKeyboardMarkup TimeSelection = new InlineKeyboardMarkup(new[]
+        {
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("10:00",$"SelectHour 10:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("11:00",$"SelectHour 11:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("12:00",$"SelectHour 12:00 {selected_date} {week_number}")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("13:00",$"SelectHour 13:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("14:00",$"SelectHour 14:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("15:00",$"SelectHour 15:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("16:00",$"SelectHour 16:00 {selected_date} {week_number}")
+                },
+                 new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("17:00",$"SelectHour 17:00 {selected_date} {week_number}")
+                },
+                  new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️",$"DateSelection {week_number}")
+                }
+            });
+
+        return TimeSelection;
+    }
+
+    private static async Task<List<TimeSpan>> FindFreeSeqence(MyUser user, DateOnly selected_date)
+    {
+
+        int service_duration = GetServiceDuration(user);
+        List<TimeSpan> free_times = new List<TimeSpan>();
+        // Смотрим, сколько временных юнитов нужно для данного мигранта 
+        // Именно такой длины должна быть последовательность юнитов
+        int time_block = service_duration / 5;
+
+        var free_entries = await TimeItem.GetFreeEntries(selected_date);
+
+        // Цикл выделения подходящийх временных отрезков 
+        for (int i = 1; i <= 90; i++)
+        {
+
+            if (!free_entries.Keys.Contains(i))
+                continue;
+
+            bool curr_entry_flag = true;
+
+            for (int j = i + 1; j < i + time_block; j++)
+            {
+                curr_entry_flag = free_entries.Keys.Contains(j);
+
+                if (!curr_entry_flag)
+                {
+                    break;
+                }
+            }
+
+
+
+            if (curr_entry_flag)
+            {
+                free_times.Add(TimeSpan.Parse(free_entries[i].Time));
+                //если последовательность подходит, подэлементы не нужно проверять 
+
+              //  i += time_block - 1;
+                //// цикл загрузки временного отрезка очередным мигрантом 
+                //for (int k = i; k < i + time_block; k++)
+                //{
+                //    await free_entries[k].AddWorkLoad(selected_date);
+                //}
+
+
+
+            }
+
+        }
+
+
+        return free_times;
+    }
+
+}
 }

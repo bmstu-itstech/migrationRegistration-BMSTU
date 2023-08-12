@@ -18,7 +18,10 @@ namespace MigrationBot
             {
                 if (query.Contains("setCountry")) await SetCountry(query, chatId, bot, user);
                 else if (query.Contains("setService")) await SetService(query, chatId, bot, user);
-                else if(query.Contains("DateSelection")) await DateSelection(query, chatId, bot, user); 
+                else if (query.Contains("DateSelection")) await SelectDate(query, chatId, bot, user);
+                else if (query.Contains("SelectDate")) await SelectHour(query, chatId, bot, user);
+                else if (query.Contains("SelectHour")) await SelectTime(query, chatId, bot, user);
+
             }
             catch (Exception ex)
             {
@@ -46,17 +49,38 @@ namespace MigrationBot
             user.Service = (Enums.Services)selection;
             await user.Save();
 
-            var keybord = Functions.GenerateEntryKeyBoard(user,1);
+            var keybord = Functions.GenerateDateKeyBoard(user,1);
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry,replyMarkup:keybord);
         }
-        private static async Task DateSelection(string query, long chatId, TelegramBotClient bot, MyUser user)
+        private static async Task SelectDate(string query, long chatId, TelegramBotClient bot, MyUser user)
         {
             int week_number = int.Parse(query.Split(' ')[1]);
           
-            var keybord = Functions.GenerateEntryKeyBoard(user, week_number);
+            var keybord = Functions.GenerateDateKeyBoard(user, week_number);
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+        }
+        private static async Task SelectHour(string query, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            DateOnly selected_date = DateOnly.Parse(query.Split(' ')[1]);
+            int week_number = int.Parse(query.Split(' ')[2]);
+
+            var keybord = Functions.GenerateHourSelectionKeyBoard(selected_date, week_number);
+
+            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskHourForEntry, replyMarkup: keybord);
+
+        }
+        private static async Task SelectTime(string query, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            TimeSpan selected_hour = TimeSpan.Parse(query.Split(' ')[1]);
+            DateOnly selected_date = DateOnly.Parse(query.Split(' ')[2]);
+            int week_number = int.Parse(query.Split(' ')[3]);
+
+            var keybord = await Functions.GenerateTimeSelectionKeuBoard(user,selected_date,selected_hour, week_number);
+
+            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskTimeForEntry, replyMarkup: keybord);
+
         }
     }
 }

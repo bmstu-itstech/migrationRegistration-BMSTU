@@ -53,9 +53,7 @@ namespace MigrationBot
 
             user.Comand = "AskFioRu";
 
-            var keybord = Functions.GenerateEntryKeyBoard(user,1);
-
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+          
 
             await user.Save();
 

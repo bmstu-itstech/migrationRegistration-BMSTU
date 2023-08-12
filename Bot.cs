@@ -50,7 +50,7 @@ namespace MigrationBot
                     }
                     catch (OperationCanceledException exception)
                     {
-                        Console.WriteLine(exception);
+                        
                     }
                 }
                 catch (Exception ex)

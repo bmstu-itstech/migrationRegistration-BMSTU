@@ -4,21 +4,10 @@ using Npgsql;
 using MigrationBot.Data;
 using MigrationBot.Models;
 
+
+
 //CreateDateTables();
-//
-// DropDateTables();
-
-var date = new DateOnly(2023, 8, 11);
-
-
-
-var lst = await TimeItem.GetFreeEntries(date);
-
-foreach (var entry in lst)
-{
-    Console.WriteLine(entry.Time);
-}
-
+//DropDateTables();
 while (true)
 {
     try

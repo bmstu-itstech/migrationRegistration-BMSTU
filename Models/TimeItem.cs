@@ -21,13 +21,15 @@ namespace MigrationBot.Models
             }
         }
 
-        public static async Task<List<TimeItem>> GetFreeEntries(DateOnly date)
+        public static async Task<Dictionary<int, TimeItem>> GetFreeEntries(DateOnly date)
         {
-            List <TimeItem> output = new List<TimeItem>();  
+            // Id, item
+            // id - порядковый номер юнита в БД
 
-            string table_name = $"\"{date.ToString()}\"";
-            Console.WriteLine(table_name);  
-            string select = $"SELECT * FROM {table_name} WHERE count < 3;";
+            Dictionary<int,TimeItem> free_entries = new Dictionary<int, TimeItem> ();   
+       
+            //Забираем только уже свободные юниты
+            string select = $"SELECT * FROM \"{date.ToString()}\" WHERE count < 3;";
 
             using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
             {
@@ -41,12 +43,14 @@ namespace MigrationBot.Models
                         while(await reader.ReadAsync())
                         {
                             var time_item = new TimeItem();
- 
+                                
                             time_item.Id = reader.GetInt32(0);
                             time_item.Time = reader.GetString(1);
                             time_item.Count = reader.GetInt32(2);
 
-                            output.Add(time_item);
+
+                            free_entries.Add(time_item.Id,time_item);
+                            
                         }
 
 
@@ -55,7 +59,21 @@ namespace MigrationBot.Models
                 }
             };
 
-            return output;
+            return free_entries;
+        }
+        public async Task AddWorkLoad(DateOnly date)
+        {
+            string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE id = {this.Id}";
+
+            using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+            {
+                await conn.OpenAsync();
+
+                using (var command = new NpgsqlCommand(update, conn))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
         }
 
     }
