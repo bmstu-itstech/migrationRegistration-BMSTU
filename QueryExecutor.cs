@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bots.Types;
 
 namespace MigrationBot
 {
@@ -26,7 +28,7 @@ namespace MigrationBot
                 else if (query.Contains("SelectTime")) await SetUserEntry(query, chatId, bot, user, change_flag);
                 else if (query.Contains("Change")) await Changers(query, chatId, bot, user);
                 else if (query == "Registration_End") await ProveRegistration(query, chatId, bot, user);
-
+                else if (query.Contains("МoveEntry") || query.Contains("RejectEntry")) await MoveEntry(user, bot, change_flag);
             }
             catch (Exception ex)
             {
@@ -66,7 +68,7 @@ namespace MigrationBot
 
             if (edit_flag)
             {
-                
+
                 var keybord = Functions.GenerateDateKeyBoard(user, 1);
 
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
@@ -77,7 +79,7 @@ namespace MigrationBot
 
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
             }
-               
+
         }
         private static async Task SetUserEntry(string query, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
@@ -90,13 +92,31 @@ namespace MigrationBot
 
             await user.Save();
 
-            await EndReg(chatId, bot, user);
+            if(edit_flag == false)
+            {
+                await EndReg(chatId, bot, user);
+
+
+            }
+            else
+            {
+                var entry = new MyEntry()
+                {
+                    UserId = chatId,
+                    Date = (DateTime)user.Entry,
+                };
+
+                await entry.Update((DateTime)user.Entry);
+
+                await GenerateLastMessage(user, bot);
+            }
+
         }
         private static async Task SelectDate(string query, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
             int week_number = int.Parse(query.Split(' ')[1]);
 
-            var keybord = Functions.GenerateDateKeyBoard(user, week_number);
+            var keybord = Functions.GenerateDateKeyBoard(user, week_number, edit_flag);
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
         }
@@ -105,7 +125,7 @@ namespace MigrationBot
             DateOnly selected_date = DateOnly.Parse(query.Split(' ')[1]);
             int week_number = int.Parse(query.Split(' ')[2]);
 
-            var keybord = Functions.GenerateHourSelectionKeyBoard(selected_date, week_number);
+            var keybord = Functions.GenerateHourSelectionKeyBoard(selected_date, week_number, edit_flag);
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskHourForEntry, replyMarkup: keybord);
 
@@ -116,22 +136,9 @@ namespace MigrationBot
             DateOnly selected_date = DateOnly.Parse(query.Split(' ')[2]);
             int week_number = int.Parse(query.Split(' ')[3]);
 
-            var keybord = await Functions.GenerateTimeSelectionKeuBoard(user, selected_date, selected_hour, week_number);
+            var keybord = await Functions.GenerateTimeSelectionKeyBoard(user, selected_date, selected_hour, week_number, edit_flag);
 
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskTimeForEntry, replyMarkup: keybord);
-
-        }
-        
-        private static async Task ProveRegistration(string query, long chatId, TelegramBotClient bot, MyUser user)
-        {
-            var entry = new MyEntry()
-            {
-                UserId = chatId,
-                Date = (DateTime)user.Entry,
-            };
-
-           await entry.Add();
-
 
         }
 
@@ -141,13 +148,13 @@ namespace MigrationBot
 
             await user.Save();
 
-            string mess = "Убедитесь, что указанные ниже данные верны:\n" +
-             $"🔷 Фио (ru): {user.FioRu}\n" +
-             $"🔷 Фио (en): {user.FioEn}\n" +
-             $"🔷 Страна: {Enums.Countries_byId[(int)user.Country]}\n" +
-             $"🔷 Услуга: {Enums.Services_byId[(int)user.Service]}\n" +
-             $"🔷 Дата прибытия: {user.ArrivalDate:D}\n" +
-             $"🔷 Дата записи: {user.Entry:f}\n";
+            string mess = "Убедитесь, что указанные ниже данные верны:\n\n" +
+             $"🔷 Фио (ru): {user.FioRu}\n\n" +
+             $"🔷 Фио (en): {user.FioEn}\n\n" +
+             $"🔷 Страна: {Enums.Countries_byId[(int)user.Country]}\n\n" +
+             $"🔷 Услуга: {Enums.Services_byId[(int)user.Service]}\n\n" +
+             $"🔷 Дата прибытия: {user.ArrivalDate:D}\n\n" +
+             $"🔷 Дата записи: {user.Entry:f}";
 
 
             await bot.SendTextMessageAsync(chatId, mess, replyMarkup: Data.KeyBords.EndRegKeyBoard);
@@ -155,7 +162,7 @@ namespace MigrationBot
 
         private static async Task Changers(string query, long chatId, TelegramBotClient bot, MyUser user)
         {
-            if(query == "ChangeFio_Ru") 
+            if (query == "ChangeFio_Ru")
             {
                 user.Comand = "ChangeFioRu";
                 await user.Save();
@@ -167,7 +174,7 @@ namespace MigrationBot
                 await user.Save();
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
             }
-            if(query == "ChangeCountry")
+            if (query == "ChangeCountry")
             {
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection_Change);
 
@@ -181,9 +188,54 @@ namespace MigrationBot
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskArivalDate);
 
             }
-            if(query == "ChangeService")
+            if (query == "ChangeService")
             {
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection_Change);
+
+            }
+        }
+
+        private static async Task GenerateLastMessage(MyUser user, TelegramBotClient bot)
+        {
+            string last_message = $"Вы записаны на {user.Entry:f}";
+
+            await bot.SendTextMessageAsync(user.ChatId, last_message, replyMarkup: Data.KeyBords.EntryKeyBoard);
+
+        }
+
+        private static async Task ProveRegistration(string query, long chatId, TelegramBotClient bot, MyUser user)
+        {
+            var entry = new MyEntry()
+            {
+                UserId = chatId,
+                Date = (DateTime)user.Entry,
+            };
+
+            await entry.Add();
+
+            await GenerateLastMessage(user, bot);
+
+        }
+
+        private static async Task MoveEntry(MyUser user, TelegramBotClient bot,bool edit_flag = false)
+        {
+            try
+            {
+                MyEntry entry = await MyEntry.GetEntry(user.ChatId);
+
+                if (entry is not null)
+                    await entry.UnEnroll();
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                var keybord = Functions.GenerateDateKeyBoard(user, 1, edit_flag);
+
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.RejectEntry);
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
 
             }
         }

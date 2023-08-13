@@ -20,19 +20,21 @@ public partial class MigroBotContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-  => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
+        => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entry>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.UserId).HasName("Entries_pkey");
 
+            entity.Property(e => e.UserId)
+                .ValueGeneratedNever()
+                .HasColumnName("user_id");
             entity.Property(e => e.Date).HasColumnType("timestamp without time zone");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.User).WithOne(p => p.EntryNavigation)
+                .HasForeignKey<Entry>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_id_fk");
         });

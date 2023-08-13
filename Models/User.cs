@@ -20,4 +20,6 @@ public partial class User
     public string? FioRu { get; set; }
 
     public DateOnly? ArrivalDate { get; set; }
+
+    public virtual Entry? EntryNavigation { get; set; }
 }

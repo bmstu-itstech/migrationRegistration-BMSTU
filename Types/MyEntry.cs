@@ -54,16 +54,16 @@ namespace MigrationBot.Types
                 }
             });
         }
-        public static async Task<Entry> GetEntry(long user_id)
+        public static async Task<MyEntry> GetEntry(long user_id)
         {
             using (MigroBotContext db = new MigroBotContext())
             {
                 var entry = db.Entries.Where(x => x.UserId == user_id).FirstOrDefault();
 
-                return new Entry
+                return new MyEntry
                 {
                     UserId = entry.UserId,
-                    Date = entry.Date,
+                    Date = (DateTime)entry.Date,
                 };
 
 
@@ -77,6 +77,30 @@ namespace MigrationBot.Types
                 UserId = UserId,
                 Date = Date
             };
+        }
+
+        public async Task Enroll()
+        {
+            // Меняем значения в временной таблице
+            DateOnly date = DateOnly.FromDateTime(this.Date);
+            TimeSpan time = new TimeSpan(this.Date.Hour, this.Date.Minute, this.Date.Second);
+
+            await TimeUnit.TookEntryPlace(date, time);
+
+        }
+        public async Task UnEnroll()
+        {
+            // Меняем значения в временной таблице
+            DateOnly date = DateOnly.FromDateTime(this.Date);
+            TimeSpan time = new TimeSpan(this.Date.Hour, this.Date.Minute, this.Date.Second);
+
+            await TimeUnit.FreeEntryPlace(date, time);
+
+            using (MigroBotContext db = new MigroBotContext())
+            {
+                db.Remove(this.ConvertToSqlEnrty());
+
+            }
         }
     }
 }

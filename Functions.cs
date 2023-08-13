@@ -50,7 +50,7 @@ namespace MigrationBot
             return service_duration;
         }
 
-        public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number)
+        public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number,bool edit_flag=false)
         {
             int days = GetUserDays(user);
             int totaldays_skipped = (week_number - 1) * 7;
@@ -59,10 +59,12 @@ namespace MigrationBot
 
             date = date.AddDays((week_number - 1) * 7);
 
+            string mode = "";
+            if(edit_flag)
+                mode = "change:true";
 
-
-            var next = InlineKeyboardButton.WithCallbackData("➡️ Далее ➡️", $"DateSelection {week_number + 1}");
-            var back = InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"DateSelection {week_number - 1}");
+            var next = InlineKeyboardButton.WithCallbackData("➡️ Далее ➡️", $"DateSelection {week_number + 1} {mode}");
+            var back = InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"DateSelection {week_number - 1} {mode}");
 
             List<List<InlineKeyboardButton>> keybord_buttnons = new List<List<InlineKeyboardButton>>();
 
@@ -81,7 +83,7 @@ namespace MigrationBot
                 if (!(date.Month >= 10) && date.Day >= 10)
                     curr_date = $"{date.Day}.0{date.Month}";
 
-                button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date} {week_number}"));
+                button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date} {week_number} {mode}"));
                 keybord_buttnons.Add(button);
 
 
@@ -112,10 +114,14 @@ namespace MigrationBot
 
             return new InlineKeyboardMarkup(keybord_buttnons);
         }
-        public static async Task<InlineKeyboardMarkup> GenerateTimeSelectionKeuBoard(MyUser user, DateOnly selected_date, TimeSpan selected_hour, int week_number)
+        public static async Task<InlineKeyboardMarkup> GenerateTimeSelectionKeyBoard(MyUser user, DateOnly selected_date, TimeSpan selected_hour, int week_number, bool edit_flag = false)
         {
             var free_times = await FindFreeSeqence(user, selected_date);
             var free_times_in_hour = new List<TimeSpan>();
+
+            string mode = "";
+            if (edit_flag)
+                mode = "change:true";
 
             foreach (var time in free_times)
             {
@@ -130,7 +136,7 @@ namespace MigrationBot
             {
                 List<InlineKeyboardButton> button = new List<InlineKeyboardButton>
                 {
-                    InlineKeyboardButton.WithCallbackData(time.ToString(@"hh\:mm"), $"SelectTime {selected_date} {time.ToString()}")
+                    InlineKeyboardButton.WithCallbackData(time.ToString(@"hh\:mm"), $"SelectTime {selected_date} {time.ToString()} {mode}")
                 };
 
                 keyboard.Add(button);
@@ -138,52 +144,56 @@ namespace MigrationBot
 
             List<InlineKeyboardButton> back = new List<InlineKeyboardButton>
             {
-                InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"SelectDate {selected_date} {week_number}")
+                InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️", $"SelectDate {selected_date} {week_number} {mode}")
             };
             keyboard.Add(back);
 
             return new InlineKeyboardMarkup(keyboard);
 
         }
-        public static InlineKeyboardMarkup GenerateHourSelectionKeyBoard(DateOnly selected_date, int week_number)
+        public static InlineKeyboardMarkup GenerateHourSelectionKeyBoard(DateOnly selected_date, int week_number, bool edit_flag = false)
         {
+            string mode = "";
+            if (edit_flag)
+                mode = "change:true";
+
             InlineKeyboardMarkup TimeSelection = new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("10:00",$"SelectHour 10:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("10:00",$"SelectHour 10:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("11:00",$"SelectHour 11:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("11:00",$"SelectHour 11:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("12:00",$"SelectHour 12:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("12:00",$"SelectHour 12:00 {selected_date} {week_number} {mode}")
                 },
                 new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("13:00",$"SelectHour 13:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("13:00",$"SelectHour 13:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("14:00",$"SelectHour 14:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("14:00",$"SelectHour 14:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("15:00",$"SelectHour 15:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("15:00",$"SelectHour 15:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("16:00",$"SelectHour 16:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("16:00",$"SelectHour 16:00 {selected_date} {week_number} {mode}")
                 },
                  new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("17:00",$"SelectHour 17:00 {selected_date} {week_number}")
+                    InlineKeyboardButton.WithCallbackData("17:00",$"SelectHour 17:00 {selected_date} {week_number} {mode}")
                 },
                   new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️",$"DateSelection {week_number}")
+                    InlineKeyboardButton.WithCallbackData("⬅️ Назад ⬅️",$"DateSelection {week_number} {mode}")
                 }
             });
 
@@ -230,11 +240,5 @@ namespace MigrationBot
             return free_times;
         }
 
-        public static async Task Enroll(MyUser user,DateOnly selected_date,TimeSpan selected_time)
-        {
-            
-
-            
-        }
     }
 }

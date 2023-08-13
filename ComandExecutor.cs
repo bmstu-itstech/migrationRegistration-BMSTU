@@ -67,11 +67,11 @@ namespace MigrationBot
         {
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
 
-
+            user.Comand = "AskFioRu";
 
             await user.Save();
 
-            user.Comand = "AskFioRu";
+            
             await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioRu);
 
         }
@@ -82,7 +82,9 @@ namespace MigrationBot
 
             await user.Save();
 
-            if (edit_flag)
+            Console.WriteLine(edit_flag);
+
+            if (edit_flag == true)
                await QueryExecutor.EndReg(chatId, bot, user);
             else
             {

@@ -6,7 +6,7 @@ using MigrationBot.Models;
 
 
 
-CreateDateTables();
+//CreateDateTables();
 //DropDateTables();
 while (true)
 {

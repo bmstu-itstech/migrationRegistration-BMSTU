@@ -62,7 +62,7 @@ namespace MigrationBot.Models
 
             return free_entries;
         }
-        public static async Task Enroll(DateOnly date,TimeSpan time)
+        public static async Task TookEntryPlace(DateOnly date,TimeSpan time)
         {
             string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE time = {time.ToString()}";
 
@@ -76,7 +76,7 @@ namespace MigrationBot.Models
                 }
             }
         }
-        public static async Task UnEnroll(DateOnly date, TimeSpan time)
+        public static async Task FreeEntryPlace(DateOnly date, TimeSpan time)
         {
             string update = $"UPDATE \"{date.ToString()}\" SET count = count - 1 WHERE time = {time.ToString()}";
 
