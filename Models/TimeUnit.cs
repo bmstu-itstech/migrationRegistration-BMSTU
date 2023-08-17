@@ -64,7 +64,8 @@ namespace MigrationBot.Models
         }
         public static async Task TookEntryPlace(DateOnly date,TimeSpan time)
         {
-            string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE time = {time.ToString()}";
+            string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
+
 
             using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
             {
@@ -78,7 +79,7 @@ namespace MigrationBot.Models
         }
         public static async Task FreeEntryPlace(DateOnly date, TimeSpan time)
         {
-            string update = $"UPDATE \"{date.ToString()}\" SET count = count - 1 WHERE time = {time.ToString()}";
+            string update = $"UPDATE \"{date.ToString()}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
 
             using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
             {

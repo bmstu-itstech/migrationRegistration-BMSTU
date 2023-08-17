@@ -1,10 +1,13 @@
-﻿using MigrationBot.Models;
+﻿using MigrationBot.Data;
+using MigrationBot.Models;
 using MigrationBot.Types;
+using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
 using static MigrationBot.Types.Enums;
@@ -28,7 +31,7 @@ namespace MigrationBot
 
             return days;
         }
-        private static int GetServiceDuration(MyUser user)
+        public static int GetServiceDuration(MyUser user)
         {
             int service_duration = 0;
 
@@ -50,7 +53,7 @@ namespace MigrationBot
             return service_duration;
         }
 
-        public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number,bool edit_flag=false)
+        public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number, bool edit_flag = false)
         {
             int days = GetUserDays(user);
             int totaldays_skipped = (week_number - 1) * 7;
@@ -60,7 +63,7 @@ namespace MigrationBot
             date = date.AddDays((week_number - 1) * 7);
 
             string mode = "";
-            if(edit_flag)
+            if (edit_flag)
                 mode = "change:true";
 
             var next = InlineKeyboardButton.WithCallbackData("➡️ Далее ➡️", $"DateSelection {week_number + 1} {mode}");
@@ -88,9 +91,13 @@ namespace MigrationBot
 
 
 
+                // В Субботу и воскресенье приём не ведётся, поэтому после пятницы нужно пропустить не 1 день, а сразу 2
+                if (date.DayOfWeek == DayOfWeek.Friday)
+                    date = date.AddDays(2);
+                totaldays_skipped += 2;
+
                 date = date.AddDays(1);
                 totaldays_skipped++;
-
                 if (days <= totaldays_skipped)
                     break;
             }
@@ -238,6 +245,167 @@ namespace MigrationBot
             }
 
             return free_times;
+        }
+
+
+        public static async void CreateDateTables()
+        {
+            var date = DateTime.Now;
+
+            for (int i = 0; i < 30; i++)
+            {
+
+
+                var time = new TimeSpan(10, 0, 0);
+                var diner_start = new TimeSpan(12, 30, 0);
+                var diner_end = new TimeSpan(13, 30, 0);
+
+
+
+                string query = $"CREATE TABLE \"{date.ToShortDateString()}\"" +
+                    $"(" +
+                    $"id INTEGER PRIMARY KEY," +
+                    $"time CHARACTER VARYING(255)," +
+                    $"count INTEGER" +
+                    $");";
+
+                if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
+                {
+
+                    using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                    {
+                        await conn.OpenAsync();
+
+                        using (var command = new NpgsqlCommand(query, conn))
+                        {
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    };
+
+
+                    int time_blocks_count = 90;
+
+                    //Если это пятница, то приём ведётся до 16:45
+                    if (date.DayOfWeek == DayOfWeek.Friday)
+                        time_blocks_count = 81;
+                    for (int j = 0; j <= time_blocks_count; j++)
+                    {
+                        var size = new TimeSpan(0, 5, 0);
+
+                        int count = 0;
+
+                        if (time >= diner_start && time <= diner_end)
+                            count = 3;
+
+                        string insert = $"INSERT INTO \"{date.ToShortDateString()}\" (id,time,count) VALUES({j + 1},'{time}',{count});";
+
+                        using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                        {
+                            await conn.OpenAsync();
+
+                            using (var command = new NpgsqlCommand(insert, conn))
+                            {
+                                await command.ExecuteNonQueryAsync();
+                            }
+                        };
+                        time = time.Add(size);
+                    }
+                }
+                date = date.AddDays(1);
+            }
+        }
+
+        public static async void DropDateTables()
+        {
+            var date = DateTime.Now;
+
+            for (int i = 0; i < 30; i++)
+            {
+                string drop = $"DROP TABLE \"{date.ToShortDateString()}\"";
+
+                try
+                {
+                    using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                    {
+                        await conn.OpenAsync();
+
+                        using (var command = new NpgsqlCommand(drop, conn))
+                        {
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    };
+                }
+                catch (Exception)
+                {
+
+                }
+
+                date = date.AddDays(1);
+
+            }
+
+
+        }
+
+        public static bool isRuFioValid(string Fio)
+        {
+            if (Fio.Contains("'\'") || Fio.Contains("/") || Fio.Contains("'"))
+                return false;
+            if (Fio.Split(' ').Length == 2 || Fio.Split(' ').Length == 3)
+            {
+                Fio = Fio.ToLower();
+                foreach (char el in Fio)
+                {
+                    if (char.IsDigit(el))
+                        return false;
+
+                    if (el != ' ')
+                    {
+                        if (((int)el >= 97 && (int)el <= 122))
+                        {
+                            return false;
+                        }
+                    }
+
+                }
+            }
+            else
+                return false;
+
+            return true;
+
+        }
+
+        public static bool isEnFioValid(string Fio)
+        {
+            if (Fio.Contains("'\'") || Fio.Contains("/") || Fio.Contains("'"))
+                return false;
+            if (Fio.Split(' ').Length == 2 || Fio.Split(' ').Length == 3)
+            {
+                Fio = Fio.ToLower();
+
+                foreach (char el in Fio)
+                {
+                    if (char.IsDigit(el))
+                        return false;
+
+                    if (el != ' ')
+                    {
+
+                        Console.Write((int)el + " ");
+                        if (((int)el >= 'а' && (int)el <= 'я'))
+                        {
+                            return false;
+                        }
+                    }
+
+                }
+            }
+            else
+                return false;
+
+            return true;
+
         }
 
     }

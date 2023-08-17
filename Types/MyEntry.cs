@@ -32,7 +32,7 @@ namespace MigrationBot.Types
                     }
                     catch (DbUpdateException)
                     {
-                      
+
 
                     }
 
@@ -67,6 +67,8 @@ namespace MigrationBot.Types
                 };
 
 
+
+
             }
         }
 
@@ -79,23 +81,35 @@ namespace MigrationBot.Types
             };
         }
 
-        public async Task Enroll()
+        public async Task Enroll(MyUser user)
         {
             // Меняем значения в временной таблице
             DateOnly date = DateOnly.FromDateTime(this.Date);
             TimeSpan time = new TimeSpan(this.Date.Hour, this.Date.Minute, this.Date.Second);
 
-            await TimeUnit.TookEntryPlace(date, time);
+            int time_block_count = Functions.GetServiceDuration(user) / 5;
+
+            for (int i = 0; i < time_block_count; i++)
+            {
+                await TimeUnit.TookEntryPlace(date, time);
+                time = time.Add(new TimeSpan(0, 5, 0));
+            }
+
 
         }
-        public async Task UnEnroll()
+        public async Task UnEnroll(MyUser user)
         {
             // Меняем значения в временной таблице
             DateOnly date = DateOnly.FromDateTime(this.Date);
             TimeSpan time = new TimeSpan(this.Date.Hour, this.Date.Minute, this.Date.Second);
 
-            await TimeUnit.FreeEntryPlace(date, time);
+            int time_block_count = Functions.GetServiceDuration(user) / 5;
+            for (int i = 0; i < time_block_count; i++)
+            {
+                await TimeUnit.FreeEntryPlace(date, time);
+                time = time.Add(new TimeSpan(0, 5, 0));
 
+            }
             using (MigroBotContext db = new MigroBotContext())
             {
                 db.Remove(this.ConvertToSqlEnrty());

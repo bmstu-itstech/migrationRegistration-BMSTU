@@ -212,6 +212,8 @@ namespace MigrationBot
             };
 
             await entry.Add();
+            await entry.Enroll(user);
+
 
             await GenerateLastMessage(user, bot);
 
@@ -224,7 +226,7 @@ namespace MigrationBot
                 MyEntry entry = await MyEntry.GetEntry(user.ChatId);
 
                 if (entry is not null)
-                    await entry.UnEnroll();
+                    await entry.UnEnroll(user);
             }
             catch (Exception)
             {

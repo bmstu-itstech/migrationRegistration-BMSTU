@@ -77,6 +77,12 @@ namespace MigrationBot
         }
         internal static async Task AskFio_Ru(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
+            try
+            {
+
+           
+            if (Functions.isRuFioValid(message))
+                throw new Exception();
             user.FioRu = message;
             user.Comand = "AskFioEn";
 
@@ -91,17 +97,34 @@ namespace MigrationBot
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
 
             }
+            }
+            catch (Exception)
+            {
+
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.InputErorr);
+            }
         }
         internal static async Task AskFio_En(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
-            user.FioEn = message;
+            try
+            {
+                if (Functions.isEnFioValid(message))
+                    throw new Exception();
+                user.FioEn = message;
 
-            await user.Save();
+                await user.Save();
 
-            if (edit_flag)
-                await QueryExecutor.EndReg(chatId, bot, user);
-            else
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection);
+                if (edit_flag)
+                    await QueryExecutor.EndReg(chatId, bot, user);
+                else
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection);
+            }
+            catch (Exception)
+            {
+
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.InputErorr);
+            }
+
         }
         internal static async Task AskArivalDate(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
