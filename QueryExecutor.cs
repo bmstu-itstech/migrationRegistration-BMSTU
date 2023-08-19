@@ -202,7 +202,8 @@ namespace MigrationBot
 
         private static async Task GenerateLastMessage(MyUser user, TelegramBotClient bot)
         {
-            string last_message = $"Вы записаны на {user.Entry:f}";
+            string last_message = $"Вы записаны на {user.Entry:f}\nСоветуем прийти за полчаса до вашего времени, чтобы не пропустить свою очередь. " +
+            $"Если вы не сможете прийти просим вас написать об этом";
 
             await bot.SendTextMessageAsync(user.ChatId, last_message, replyMarkup: Data.KeyBoards.EntryKeyBoard);
 

@@ -54,6 +54,7 @@ namespace MigrationBot
             return service_duration;
         }
 
+
         public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number, bool edit_flag = false)
         {
             int days = GetUserDays(user);
@@ -91,8 +92,8 @@ namespace MigrationBot
 
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
                     keybord_buttnons.Add(button);
-                
-                    
+
+
 
 
 
@@ -102,7 +103,7 @@ namespace MigrationBot
                     date = date.AddDays(2);
                     totaldays_skipped += 2;
                 }
-         
+
 
                 date = date.AddDays(1);
                 totaldays_skipped++;
@@ -353,6 +354,23 @@ namespace MigrationBot
             }
 
 
+        }
+
+        public static async void AppendSheets()
+        {
+            var date = DateTime.Now;
+
+            for (int i = 0; i < 30; i++)
+            {
+
+                if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
+                {
+                    var gw = new GoogleSheetWorker();
+
+                    await gw.AddSheet(DateOnly.FromDateTime(date).ToString());
+                }
+                date = date.AddDays(1);
+            }
         }
 
         public static bool isRuFioValid(string Fio)

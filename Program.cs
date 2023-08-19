@@ -5,9 +5,9 @@ using MigrationBot.Data;
 using MigrationBot.Models;
 using MigrationBot.Types;
 
-// Functions.CreateDateTables();
-// Functions.DropDateTables();
-
+ //Functions.CreateDateTables();
+//Functions.DropDateTables();
+Functions.AppendSheets();
 
 
 while (true)
