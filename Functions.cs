@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using static MigrationBot.Types.Enums;
 
@@ -415,5 +416,25 @@ namespace MigrationBot
 
         }
 
+        internal static async Task RemoveEntryFor(long user_chat, TelegramBotClient bot)
+        {
+            var entry = await MyEntry.GetEntry(user_chat);
+            if (entry is not null)
+            {
+                await bot.SendTextMessageAsync(user_chat, Data.Strings.Messeges.Excuse_Message);
+
+
+                var user = await MyUser.GetUser(user_chat);
+
+                await entry.UnEnroll(user);
+
+                var gw = new GoogleSheetWorker();
+                gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
+
+                var keybord = Functions.GenerateDateKeyBoard(user, 1, true);
+
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+            }
+        }
     }
 }

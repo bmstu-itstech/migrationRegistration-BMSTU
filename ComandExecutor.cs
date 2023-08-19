@@ -21,7 +21,7 @@ namespace MigrationBot
                     if (message == "/start") await Start(message, chatId, bot, user);
                     else if ((bool)(user?.Comand?.Contains("Ask"))) await ExecuteSetters(message, chatId, bot, user);
                     else if (user.Comand.Contains("Change")) await ExecuteChangers(message, chatId, bot, user);
-
+                    else if (message.Contains("/remove") && message.Contains("-r")) await Functions.RemoveEntryFor(long.Parse(message.Split(' ')[2]), bot);
                 }
                 catch (Exception ex)
                 {

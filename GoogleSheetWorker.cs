@@ -48,7 +48,12 @@ namespace MigrationBot
 
             var user_entries = MyEntry.GetEntriesByDate(date);
 
-            IList<IList<object>> values = new List<IList<object>>();
+            List<object> header = new List<object> { "id", "ФИО (ru)", "ФИО (en)", "Дата прибытия", "Страна", "Услуга", "Время записи" };
+
+            IList<IList<object>> values = new List<IList<object>>
+            {
+                header
+            };
 
             foreach (var entry in user_entries)
             {
@@ -56,7 +61,9 @@ namespace MigrationBot
 
                 List<object> objectList = new List<object>()
                 {
-                    user.ChatId,user.FioRu,user.FioEn,user.ArrivalDate,
+                    user.ChatId,user.FioRu,
+                    user.FioEn,
+                    user.ArrivalDate,
                     Enums.Countries_byId[(int)user.Country],
                     Enums.Services_byId[(int)user.Service],
                     user.Entry.Value.TimeOfDay.ToString()
@@ -67,8 +74,18 @@ namespace MigrationBot
 
             valueRange.Values = values;
 
+            var update = service.Spreadsheets.Values.Update(valueRange, SpreadSheetId, range);
+            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+
+            await update.ExecuteAsync();
+        }
+
+        public async Task CleanSheet(DateOnly date)
+        {
+            var range = $"{date.ToString()}!A:G";
+            var valueRange = new ValueRange();
+
             var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadSheetId, range);
-            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
 
             await appendRequest.ExecuteAsync();
         }

@@ -28,7 +28,8 @@ namespace MigrationBot
                 else if (query.Contains("SelectTime")) await SetUserEntry(query, chatId, bot, user, change_flag);
                 else if (query.Contains("Change")) await Changers(query, chatId, bot, user);
                 else if (query == "Registration_End") await ProveRegistration(query, chatId, bot, user);
-                else if (query.Contains("МoveEntry") || query.Contains("RejectEntry")) await MoveEntry(user, bot, change_flag);
+                else if (query.Contains("МoveEntry")) await MoveEntry(user, bot, change_flag);
+                else if (query.Contains("RejectEntry")) await RejectEntry(user, bot);
             }
             catch (Exception ex)
             {
@@ -92,7 +93,7 @@ namespace MigrationBot
 
             await user.Save();
 
-            if(edit_flag == false)
+            if (edit_flag == false)
             {
                 await EndReg(chatId, bot, user);
 
@@ -225,7 +226,7 @@ namespace MigrationBot
 
         }
 
-        private static async Task MoveEntry(MyUser user, TelegramBotClient bot,bool edit_flag = false)
+        private static async Task MoveEntry(MyUser user, TelegramBotClient bot, bool edit_flag = false)
         {
             try
             {
@@ -252,5 +253,22 @@ namespace MigrationBot
 
             }
         }
+        internal static async Task RejectEntry(MyUser user, TelegramBotClient bot)
+        {
+
+            MyEntry entry = await MyEntry.GetEntry(user.ChatId);
+
+            if (entry is not null)
+            {
+                await entry.UnEnroll(user);
+
+                var gw = new GoogleSheetWorker();
+                gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
+
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.Contact_with_admin);
+            }
+
+        }
+       
     }
 }
