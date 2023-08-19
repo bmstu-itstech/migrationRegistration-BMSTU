@@ -31,7 +31,9 @@ public partial class MigroBotContext : DbContext
             entity.Property(e => e.UserId)
                 .ValueGeneratedNever()
                 .HasColumnName("user_id");
-            entity.Property(e => e.Date).HasColumnType("timestamp without time zone");
+            entity.Property(e => e.Date)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("Date ");
 
             entity.HasOne(d => d.User).WithOne(p => p.EntryNavigation)
                 .HasForeignKey<Entry>(d => d.UserId)
@@ -52,7 +54,7 @@ public partial class MigroBotContext : DbContext
             entity.Property(e => e.Comand)
                 .HasMaxLength(255)
                 .HasColumnName("comand");
-            entity.Property(e => e.Country).HasColumnName("country ");
+            entity.Property(e => e.Country).HasColumnName("country");
             entity.Property(e => e.Entry)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("entry");

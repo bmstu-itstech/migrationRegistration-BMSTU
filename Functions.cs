@@ -14,7 +14,7 @@ using static MigrationBot.Types.Enums;
 
 namespace MigrationBot
 {
-    internal class Functions
+    internal static class Functions
     {
 
         private static int GetUserDays(MyUser user)
@@ -87,14 +87,21 @@ namespace MigrationBot
                     curr_date = $"{date.Day}.0{date.Month}";
 
                 button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date} {week_number} {mode}"));
-                keybord_buttnons.Add(button);
+
+                if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
+                    keybord_buttnons.Add(button);
+                
+                    
 
 
 
                 // В Субботу и воскресенье приём не ведётся, поэтому после пятницы нужно пропустить не 1 день, а сразу 2
                 if (date.DayOfWeek == DayOfWeek.Friday)
+                {
                     date = date.AddDays(2);
-                totaldays_skipped += 2;
+                    totaldays_skipped += 2;
+                }
+         
 
                 date = date.AddDays(1);
                 totaldays_skipped++;

@@ -80,7 +80,14 @@ namespace MigrationBot.Types
                 Date = Date
             };
         }
-
+        private static MyEntry ConvertFromSqlEnrty(Entry entry)
+        {
+            return new MyEntry()
+            {
+                UserId = entry.UserId,
+                Date = (DateTime)entry.Date
+            };
+        }
         public async Task Enroll(MyUser user)
         {
             // Меняем значения в временной таблице
@@ -113,8 +120,22 @@ namespace MigrationBot.Types
             using (MigroBotContext db = new MigroBotContext())
             {
                 db.Remove(this.ConvertToSqlEnrty());
-
+                await db.SaveChangesAsync();
             }
         }
+
+        public static List<MyEntry> GetEntriesByDate(DateOnly date)
+        {
+            using (MigroBotContext db = new MigroBotContext())
+            {
+
+                var entries = db.Entries.Where(x => x.Date.Value.Day == date.Day && x.Date.Value.Month == date.Month)
+                .Select(ConvertFromSqlEnrty).OrderBy(x => x.Date).ToList();
+
+                return entries;
+            }
+
+        }
+
     }
 }

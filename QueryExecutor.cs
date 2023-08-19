@@ -106,7 +106,11 @@ namespace MigrationBot
                     Date = (DateTime)user.Entry,
                 };
 
-                await entry.Update((DateTime)user.Entry);
+                await entry.Add();
+                await entry.Enroll(user);
+
+                var gw = new GoogleSheetWorker();
+                gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
 
                 await GenerateLastMessage(user, bot);
             }
@@ -157,7 +161,7 @@ namespace MigrationBot
              $"🔷 Дата записи: {user.Entry:f}";
 
 
-            await bot.SendTextMessageAsync(chatId, mess, replyMarkup: Data.KeyBords.EndRegKeyBoard);
+            await bot.SendTextMessageAsync(chatId, mess, replyMarkup: Data.KeyBoards.EndRegKeyBoard);
         }
 
         private static async Task Changers(string query, long chatId, TelegramBotClient bot, MyUser user)
@@ -176,7 +180,7 @@ namespace MigrationBot
             }
             if (query == "ChangeCountry")
             {
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection_Change);
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBoards.CountrySelection_Change);
 
             }
             if (query == "ChangeArivalDate")
@@ -190,7 +194,7 @@ namespace MigrationBot
             }
             if (query == "ChangeService")
             {
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection_Change);
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBoards.ServiceSelection_Change);
 
             }
         }
@@ -199,7 +203,7 @@ namespace MigrationBot
         {
             string last_message = $"Вы записаны на {user.Entry:f}";
 
-            await bot.SendTextMessageAsync(user.ChatId, last_message, replyMarkup: Data.KeyBords.EntryKeyBoard);
+            await bot.SendTextMessageAsync(user.ChatId, last_message, replyMarkup: Data.KeyBoards.EntryKeyBoard);
 
         }
 
@@ -214,6 +218,8 @@ namespace MigrationBot
             await entry.Add();
             await entry.Enroll(user);
 
+            var gw = new GoogleSheetWorker();
+            gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
 
             await GenerateLastMessage(user, bot);
 
@@ -226,7 +232,12 @@ namespace MigrationBot
                 MyEntry entry = await MyEntry.GetEntry(user.ChatId);
 
                 if (entry is not null)
+                {
                     await entry.UnEnroll(user);
+
+                    var gw = new GoogleSheetWorker();
+                    gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
+                }
             }
             catch (Exception)
             {

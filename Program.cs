@@ -3,21 +3,18 @@ using MigrationBot;
 using Npgsql;
 using MigrationBot.Data;
 using MigrationBot.Models;
+using MigrationBot.Types;
 
-//Functions.DropDateTables();
-//Functions.CreateDateTables();
+// Functions.CreateDateTables();
+// Functions.DropDateTables();
 
-string fio = "Митрошкин Alex";
 
-Console.WriteLine(Functions.isRuFioValid(fio));
-Console.WriteLine(Functions.isEnFioValid(fio));
 
 while (true)
 {
     try
     {
-
-        // await Bot.Start();
+         await Bot.Start();
     }
     catch (Exception ex)
     {

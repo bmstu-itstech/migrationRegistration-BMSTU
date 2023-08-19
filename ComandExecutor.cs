@@ -65,14 +65,19 @@ namespace MigrationBot
 
         private static async Task Start(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
+
+
+
+
+
+            bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
 
             user.Comand = "AskFioRu";
 
             await user.Save();
 
-            
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioRu);
+
+            bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioRu);
 
         }
         internal static async Task AskFio_Ru(string message, long chatId, TelegramBotClient bot, MyUser user, bool edit_flag = false)
@@ -80,23 +85,24 @@ namespace MigrationBot
             try
             {
 
-           
-            if (Functions.isRuFioValid(message))
-                throw new Exception();
-            user.FioRu = message;
-            user.Comand = "AskFioEn";
 
-            await user.Save();
+                if (!Functions.isRuFioValid(message))
+                    throw new Exception();
 
-            Console.WriteLine(edit_flag);
+                user.FioRu = message;
+                user.Comand = "AskFioEn";
 
-            if (edit_flag == true)
-               await QueryExecutor.EndReg(chatId, bot, user);
-            else
-            {
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
+                await user.Save();
 
-            }
+
+
+                if (edit_flag == true)
+                    await QueryExecutor.EndReg(chatId, bot, user);
+                else
+                {
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskFioEn);
+
+                }
             }
             catch (Exception)
             {
@@ -108,7 +114,7 @@ namespace MigrationBot
         {
             try
             {
-                if (Functions.isEnFioValid(message))
+                if (!Functions.isEnFioValid(message))
                     throw new Exception();
                 user.FioEn = message;
 
@@ -117,7 +123,7 @@ namespace MigrationBot
                 if (edit_flag)
                     await QueryExecutor.EndReg(chatId, bot, user);
                 else
-                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBords.CountrySelection);
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountry, replyMarkup: Data.KeyBoards.CountrySelection);
             }
             catch (Exception)
             {
@@ -145,9 +151,9 @@ namespace MigrationBot
                     var keybord = Functions.GenerateDateKeyBoard(user, 1);
 
                     await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
-                }    
+                }
                 else
-                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBords.ServiceSelection);
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBoards.ServiceSelection);
 
 
             }

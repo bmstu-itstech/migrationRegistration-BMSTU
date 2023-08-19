@@ -5,9 +5,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>8692c6f3-833a-474b-a9c7-5c24fd33f319</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.61.0.3141" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
