@@ -18,6 +18,30 @@ namespace MigrationBot
     internal static class Functions
     {
 
+        public static int GetUserMaxDays(MyUser user)
+        {
+            int days = 0;
+            if (user.Country == Countries.TJ || user.Country == Countries.UZ)
+                days = 15;
+            if (user.Country == Countries.KZ || user.Country == Countries.KG || user.Country == Countries.AM)
+                days = 30;
+            if (user.Country == Countries.UA || user.Country == Countries.BY)
+                days = 90;
+            if (user.Country == Countries.OTHER)
+            {
+                days = 9;
+
+                if (user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    days = 10;
+                }
+                if (user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Saturday || user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Friday)
+                    days = 11;
+              
+            }
+
+            return days;
+        }
         private static int GetUserDays(MyUser user)
         {
             int days = 0;
@@ -28,11 +52,25 @@ namespace MigrationBot
             if (user.Country == Countries.UA || user.Country == Countries.BY)
                 days = 90;
             if (user.Country == Countries.OTHER)
-                days = 7;
+            {
+                days = 9;
 
-            TimeSpan ts = DateTime.Now - DateTime.Parse(s: user.ArrivalDate.ToString());
+                if (user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Sunday)
+                    days = 10;
+                if (user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Saturday || user.ArrivalDate.Value.DayOfWeek == DayOfWeek.Friday)
+                    days = 11;
+            }
+
+
+            var user_start_count_date = DateTime.Parse(user.ArrivalDate.ToString());
+            var date_time_now = DateTime.Now;
+
+
+
+            TimeSpan ts = date_time_now - user_start_count_date;
 
             int day_passed_from_arrival = ts.Days;
+
 
             return days - day_passed_from_arrival;
         }
@@ -58,7 +96,6 @@ namespace MigrationBot
             return service_duration;
         }
 
-
         public static InlineKeyboardMarkup GenerateDateKeyBoard(MyUser user, int week_number, bool edit_flag = false)
         {
             int days = GetUserDays(user);
@@ -80,7 +117,6 @@ namespace MigrationBot
             for (int j = 0; j < 7; j++)
             {
 
-
                 List<InlineKeyboardButton> button = new List<InlineKeyboardButton>();
 
                 string curr_date = $"0{date.Day}.0{date.Month}";
@@ -95,22 +131,23 @@ namespace MigrationBot
                 button.Add(InlineKeyboardButton.WithCallbackData(curr_date, $"SelectDate {curr_date} {week_number} {mode}"));
 
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
+                {
                     keybord_buttnons.Add(button);
 
-
-
-
-
+                }
                 // В Субботу и воскресенье приём не ведётся, поэтому после пятницы нужно пропустить не 1 день, а сразу 2
                 if (date.DayOfWeek == DayOfWeek.Friday)
                 {
                     date = date.AddDays(2);
+
                     totaldays_skipped += 2;
                 }
 
-
                 date = date.AddDays(1);
                 totaldays_skipped++;
+
+   
+
                 if (days <= totaldays_skipped)
                     break;
             }
@@ -320,7 +357,7 @@ namespace MigrationBot
 
                             using (var command = new NpgsqlCommand(insert, conn))
                             {
-                               await  command.ExecuteNonQueryAsync();
+                                await command.ExecuteNonQueryAsync();
                             }
                         };
                         time = time.Add(size);
@@ -346,7 +383,7 @@ namespace MigrationBot
 
                         using (var command = new NpgsqlCommand(drop, conn))
                         {
-                           await command.ExecuteNonQueryAsync();
+                            await command.ExecuteNonQueryAsync();
                         }
                     };
                 }
@@ -368,7 +405,6 @@ namespace MigrationBot
 
             for (int i = 0; i < 90; i++)
             {
-
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
                 {
                     var gw = new GoogleSheetWorker();
@@ -382,7 +418,7 @@ namespace MigrationBot
         public static async void DropSheets()
         {
             var gw = new GoogleSheetWorker();
-            await  gw.DropSheet();
+            await gw.DropSheet();
         }
 
         public static bool isRuFioValid(string Fio)

@@ -8,7 +8,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bots.Types;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MigrationBot
 {
@@ -81,11 +80,7 @@ namespace MigrationBot
 
         private static async Task Start(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
-
-
-
-           
-
+          
             bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
 
             user.Comand = "AskFioRu";
@@ -154,9 +149,10 @@ namespace MigrationBot
             {
                 var arival_date = DateOnly.Parse(message);
 
-                //Дата прибытия не может быть раньше, чем сегодняшняя
-                //if (arival_date < DateOnly.FromDateTime(DateTime.Now))
-                //    throw new Exception();
+                // Нельзя прибыть раньше, чем можно встать на миграционный учёт
+                var ts = DateTime.Now - arival_date.ToDateTime(new TimeOnly(0, 0, 0));
+                if (ts.Days > Functions.GetUserMaxDays(user))
+                    throw new Exception();
 
                 user.ArrivalDate = arival_date;
                 user.Comand = "";
