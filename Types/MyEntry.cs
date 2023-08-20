@@ -102,7 +102,8 @@ namespace MigrationBot.Types
                 time = time.Add(new TimeSpan(0, 5, 0));
             }
 
-
+            var gw = new GoogleSheetWorker();
+            await gw.UpdateEntries(DateOnly.FromDateTime(this.Date));
         }
         public async Task UnEnroll(MyUser user)
         {
@@ -119,9 +120,15 @@ namespace MigrationBot.Types
             }
             using (MigroBotContext db = new MigroBotContext())
             {
-                db.Remove(this.ConvertToSqlEnrty());
+                Console.WriteLine(this.Date);
+                db.Entries.Remove(this.ConvertToSqlEnrty());
                 await db.SaveChangesAsync();
+
             }
+            var gw = new GoogleSheetWorker();
+
+            await gw.UpdateEntries(DateOnly.FromDateTime(this.Date));
+
         }
 
         public static List<MyEntry> GetEntriesByDate(DateOnly date)

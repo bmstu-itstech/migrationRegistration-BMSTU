@@ -27,6 +27,9 @@ namespace MigrationBot.Types
 
         public DateOnly? ArrivalDate { get; set; }
 
+        public string? CountrStr { get; set; }
+
+
         public MyUser(long chatId)
         {
             ChatId = chatId;
@@ -47,7 +50,9 @@ namespace MigrationBot.Types
                 Entry = Entry,
                 FioEn = FioEn,
                 FioRu = FioRu,
-                ArrivalDate = ArrivalDate
+                ArrivalDate = ArrivalDate,
+                CountrStr = CountrStr
+                
             };
         }
 
@@ -90,6 +95,7 @@ namespace MigrationBot.Types
                     user.FioEn = FioEn;
                     user.FioRu = FioRu;
                     user.ArrivalDate = ArrivalDate;
+                    user.CountrStr = CountrStr;
 
                     await db.SaveChangesAsync();
                 }
@@ -121,18 +127,11 @@ namespace MigrationBot.Types
                     Country = (Enums.Countries)user.Country,
                     Service = (Enums.Services)user.Service,
                     Entry = user.Entry,
-                    ArrivalDate = user.ArrivalDate
+                    ArrivalDate = user.ArrivalDate,
+                    CountrStr = user.CountrStr,
                 };
             }
         }
 
-        public async Task Enroll()
-        {
-
-        }
-        public async Task UnEnroll()
-        {
-
-        }
     }
 }

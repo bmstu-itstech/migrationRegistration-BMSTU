@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bots.Types;
 
 namespace MigrationBot
 {
@@ -45,6 +47,10 @@ namespace MigrationBot
             {
                 await AskArivalDate(message, chatId, bot, user);
             }
+            else if (user.Comand == "AskCountryStr")
+            {
+                await AskCountryStr(message,  bot, user);
+            }
 
         }
         private static async Task ExecuteChangers(string message, long chatId, TelegramBotClient bot, MyUser user)
@@ -60,6 +66,11 @@ namespace MigrationBot
             else if (user.Comand == "ChangeArivalDate")
             {
                 await AskArivalDate(message, chatId, bot, user, true);
+            }
+           else if(user.Comand == "ChangeCountryStr")
+            {
+                await AskCountryStr(message, bot, user,true);
+
             }
         }
 
@@ -139,8 +150,8 @@ namespace MigrationBot
                 var arival_date = DateOnly.Parse(message);
 
                 //Дата прибытия не может быть раньше, чем сегодняшняя
-                if (arival_date < DateOnly.FromDateTime(DateTime.Now))
-                    throw new Exception();
+                //if (arival_date < DateOnly.FromDateTime(DateTime.Now))
+                //    throw new Exception();
 
                 user.ArrivalDate = arival_date;
                 user.Comand = "";
@@ -161,6 +172,27 @@ namespace MigrationBot
             {
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.InputErorr);
             }
+        }
+        public static async Task AskCountryStr(string message,  TelegramBotClient bot, MyUser user, bool edit_flag = false)
+        {
+            user.CountrStr = message;
+            user.Comand = "AskArivalDate";
+
+            await user.Save();
+
+            if (edit_flag)
+            {
+                var keybord = Functions.GenerateDateKeyBoard(user, week_number: 1) ;
+
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskService, replyMarkup: keybord);
+
+            }
+            else
+            {
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskArivalDate);
+
+            }
+            
         }
     }
 }

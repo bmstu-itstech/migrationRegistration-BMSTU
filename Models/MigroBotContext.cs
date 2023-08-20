@@ -22,6 +22,7 @@ public partial class MigroBotContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entry>(entity =>
@@ -54,6 +55,9 @@ public partial class MigroBotContext : DbContext
             entity.Property(e => e.Comand)
                 .HasMaxLength(255)
                 .HasColumnName("comand");
+            entity.Property(e => e.CountrStr)
+                .HasMaxLength(255)
+                .HasColumnName("countr_str");
             entity.Property(e => e.Country).HasColumnName("country");
             entity.Property(e => e.Entry)
                 .HasColumnType("timestamp without time zone")

@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bots.Types;
+using static MigrationBot.Types.Enums;
 
 namespace MigrationBot
 {
@@ -42,20 +43,45 @@ namespace MigrationBot
         {
             int selection = int.Parse(query.Split(' ')[1]);
 
-            user.Country = (Enums.Countries)selection;
-            user.Comand = "AskArivalDate";
+            user.Country = (Countries)selection;
 
-            await user.Save();
+          
 
             if (edit_flag)
             {
-                var keybord = Functions.GenerateDateKeyBoard(user, 1);
+                if (user.Country == Countries.OTHER)
+                    user.Comand = "ChangeCountryStr";
 
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+                await user.Save();
+
+                if (user.Country != Countries.OTHER)
+                {
+                    var keybord = Functions.GenerateDateKeyBoard(user, week_number: 1);
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
+                }
+                else
+                {
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountryStr);
+
+                }
             }
             else
             {
-                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskArivalDate);
+                if (user.Country != Countries.OTHER)
+                    user.Comand = "AskArivalDate";
+                else
+                    user.Comand = "AskCountryStr";
+
+                await user.Save();
+
+                if (user.Country != Countries.OTHER)
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskArivalDate);
+                else
+                {
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountryStr);
+                }
+
+
 
             }
 
@@ -110,8 +136,6 @@ namespace MigrationBot
                 await entry.Add();
                 await entry.Enroll(user);
 
-                var gw = new GoogleSheetWorker();
-                gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
 
                 await GenerateLastMessage(user, bot);
             }
@@ -143,7 +167,15 @@ namespace MigrationBot
 
             var keybord = await Functions.GenerateTimeSelectionKeyBoard(user, selected_date, selected_hour, week_number, edit_flag);
 
-            await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskTimeForEntry, replyMarkup: keybord);
+
+            string msg = Data.Strings.Messeges.AskTimeForEntry;
+
+            if (keybord.InlineKeyboard.Count() == 1)
+            {
+                msg = "К сожалению, запись на это время не доступна";
+            }
+
+            await bot.SendTextMessageAsync(chatId, msg, replyMarkup: keybord);
 
         }
 
@@ -202,8 +234,7 @@ namespace MigrationBot
 
         private static async Task GenerateLastMessage(MyUser user, TelegramBotClient bot)
         {
-            string last_message = $"Вы записаны на {user.Entry:f}\nСоветуем прийти за полчаса до вашего времени, чтобы не пропустить свою очередь. " +
-            $"Если вы не сможете прийти просим вас написать об этом";
+            string last_message = $"Вы записаны на {user.Entry:f}\nКабинет 403ю находится по адресу: г. Москва, ул. 2-я Бауманская, д.5, стр.1. ( поднимаетесь на 4 этаж и идёте в южное крыло до конца) \r\n\r\nСоветуем прийти за полчаса до вашего времени, чтобы не пропустить свою очередь. Если вы не сможете прийти просим вас написать об этом";
 
             await bot.SendTextMessageAsync(user.ChatId, last_message, replyMarkup: Data.KeyBoards.EntryKeyBoard);
 
@@ -220,8 +251,6 @@ namespace MigrationBot
             await entry.Add();
             await entry.Enroll(user);
 
-            var gw = new GoogleSheetWorker();
-            gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
 
             await GenerateLastMessage(user, bot);
 
@@ -237,8 +266,7 @@ namespace MigrationBot
                 {
                     await entry.UnEnroll(user);
 
-                    var gw = new GoogleSheetWorker();
-                    gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
+
                 }
             }
             catch (Exception)
@@ -263,13 +291,12 @@ namespace MigrationBot
             {
                 await entry.UnEnroll(user);
 
-                var gw = new GoogleSheetWorker();
-                gw.UpdateEntries(DateOnly.FromDateTime(entry.Date));
+
 
                 await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.Contact_with_admin);
             }
 
         }
-       
+
     }
 }

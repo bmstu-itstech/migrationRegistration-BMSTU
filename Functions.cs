@@ -30,7 +30,11 @@ namespace MigrationBot
             if (user.Country == Countries.OTHER)
                 days = 7;
 
-            return days;
+            TimeSpan ts = DateTime.Now - DateTime.Parse(s: user.ArrivalDate.ToString());
+
+            int day_passed_from_arrival = ts.Days;
+
+            return days - day_passed_from_arrival;
         }
         public static int GetServiceDuration(MyUser user)
         {
@@ -60,7 +64,7 @@ namespace MigrationBot
             int days = GetUserDays(user);
             int totaldays_skipped = (week_number - 1) * 7;
 
-            DateOnly date = (DateOnly)user.ArrivalDate;
+            DateOnly date = DateOnly.FromDateTime(DateTime.Now);
 
             date = date.AddDays((week_number - 1) * 7);
 
@@ -147,6 +151,8 @@ namespace MigrationBot
             }
 
             List<List<InlineKeyboardButton>> keyboard = new List<List<InlineKeyboardButton>>();
+
+
 
             foreach (var time in free_times_in_hour)
             {
@@ -261,7 +267,7 @@ namespace MigrationBot
         {
             var date = DateTime.Now;
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 90; i++)
             {
 
 
@@ -314,7 +320,7 @@ namespace MigrationBot
 
                             using (var command = new NpgsqlCommand(insert, conn))
                             {
-                                await command.ExecuteNonQueryAsync();
+                               await  command.ExecuteNonQueryAsync();
                             }
                         };
                         time = time.Add(size);
@@ -328,7 +334,7 @@ namespace MigrationBot
         {
             var date = DateTime.Now;
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 90; i++)
             {
                 string drop = $"DROP TABLE \"{date.ToShortDateString()}\"";
 
@@ -340,7 +346,7 @@ namespace MigrationBot
 
                         using (var command = new NpgsqlCommand(drop, conn))
                         {
-                            await command.ExecuteNonQueryAsync();
+                           await command.ExecuteNonQueryAsync();
                         }
                     };
                 }
@@ -360,7 +366,7 @@ namespace MigrationBot
         {
             var date = DateTime.Now;
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 90; i++)
             {
 
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
@@ -371,6 +377,12 @@ namespace MigrationBot
                 }
                 date = date.AddDays(1);
             }
+        }
+
+        public static async void DropSheets()
+        {
+            var gw = new GoogleSheetWorker();
+            await  gw.DropSheet();
         }
 
         public static bool isRuFioValid(string Fio)

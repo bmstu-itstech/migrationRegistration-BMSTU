@@ -42,11 +42,14 @@ namespace MigrationBot
 
         public async Task UpdateEntries(DateOnly date)
         {
+            await CleanSheet(date);
 
             var range = $"{date.ToString()}!A:G";
             var valueRange = new ValueRange();
 
             var user_entries = MyEntry.GetEntriesByDate(date);
+            Console.WriteLine(user_entries.Count);
+
 
             List<object> header = new List<object> { "id", "ФИО (ru)", "ФИО (en)", "Дата прибытия", "Страна", "Услуга", "Время записи" };
 
@@ -59,12 +62,16 @@ namespace MigrationBot
             {
                 var user = await MyUser.GetUser(entry.UserId);
 
+                string country = Enums.Countries_byId[(int)user.Country];
+
+                if (user.CountrStr != null)
+                    country = user.CountrStr;
                 List<object> objectList = new List<object>()
                 {
                     user.ChatId,user.FioRu,
                     user.FioEn,
                     user.ArrivalDate,
-                    Enums.Countries_byId[(int)user.Country],
+                    country,
                     Enums.Services_byId[(int)user.Service],
                     user.Entry.Value.TimeOfDay.ToString()
                 };
@@ -85,7 +92,9 @@ namespace MigrationBot
             var range = $"{date.ToString()}!A:G";
             var valueRange = new ValueRange();
 
-            var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadSheetId, range);
+            ClearValuesRequest request_body = new ClearValuesRequest();
+
+            var appendRequest = service.Spreadsheets.Values.Clear(request_body, SpreadSheetId, range);
 
             await appendRequest.ExecuteAsync();
         }
@@ -111,6 +120,42 @@ namespace MigrationBot
 
             // Выполнить запрос
             var response = await batchUpdateRequest.ExecuteAsync();
+
+        }
+
+        public async Task DropSheet()
+        {
+            var request = service.Spreadsheets.Get(SpreadSheetId);
+            var resp = await request.ExecuteAsync();
+
+
+            foreach(var sheet in resp.Sheets)
+            {
+
+                var delete_sheet = new DeleteSheetRequest();
+
+                delete_sheet.SheetId = sheet.Properties.SheetId;
+                BatchUpdateSpreadsheetRequest batchUpdateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest();
+                batchUpdateSpreadsheetRequest.Requests = new List<Request>
+                {
+                    new Request
+                    {
+                        DeleteSheet = delete_sheet
+                    }
+                };
+
+
+                var batchUpdateRequest =
+                    service.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest, SpreadSheetId);
+
+                if(sheet.Properties.Title != "Не удаляй меня")
+                {
+                    await batchUpdateRequest.ExecuteAsync();
+
+                }
+
+            }
+
 
         }
     }

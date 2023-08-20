@@ -21,5 +21,7 @@ public partial class User
 
     public int? Service { get; set; }
 
+    public string? CountrStr { get; set; }
+
     public virtual Entry? EntryNavigation { get; set; }
 }
