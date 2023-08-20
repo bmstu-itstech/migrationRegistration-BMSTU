@@ -1,11 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using MigrationBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace MigrationBot.Types
 {
@@ -39,9 +32,9 @@ namespace MigrationBot.Types
 
         }
 
-        private User ConvertToSqlUser()
+        private Models.User ConvertToSqlUser()
         {
-            return new User()
+            return new Models.User()
             {
                 ChatId = ChatId,
                 Country = (int?)Country,
@@ -64,7 +57,7 @@ namespace MigrationBot.Types
                 {
                     try
                     {
-                        User user = ConvertToSqlUser();
+                        Models.User user = ConvertToSqlUser();
 
                         await db.Users.AddAsync(user);
 

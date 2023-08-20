@@ -1,17 +1,4 @@
-﻿using MigrationBot.Models;
-using MigrationBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bots.Types;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static MigrationBot.Types.Enums;
-
+﻿
 namespace MigrationBot
 {
     internal class QueryExecutor

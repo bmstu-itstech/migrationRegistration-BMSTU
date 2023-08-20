@@ -1,12 +1,4 @@
-﻿using MigrationBot.Data;
-using Npgsql;
-using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace MigrationBot.Models
 {
     internal class TimeUnit
@@ -32,7 +24,7 @@ namespace MigrationBot.Models
             //Забираем только уже свободные юниты
             string select = $"SELECT * FROM \"{date.ToString()}\" WHERE count < 3;";
 
-            using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+            using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
                 await conn.OpenAsync();
 
@@ -67,7 +59,7 @@ namespace MigrationBot.Models
             string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
 
 
-            using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+            using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
                 await conn.OpenAsync();
 
@@ -81,7 +73,7 @@ namespace MigrationBot.Models
         {
             string update = $"UPDATE \"{date.ToString()}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
 
-            using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+            using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
                 await conn.OpenAsync();
 
@@ -96,7 +88,7 @@ namespace MigrationBot.Models
         {
             string select = $"SELECT * FROM \"{date.ToString()}\" WHERE time = {time.ToString()}";
 
-            using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+            using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
                 await conn.OpenAsync();
 

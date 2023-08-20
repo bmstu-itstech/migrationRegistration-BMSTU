@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-
+﻿
 namespace MigrationBot.Models;
 
 public partial class MigroBotContext : DbContext

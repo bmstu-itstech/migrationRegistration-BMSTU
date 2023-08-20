@@ -1,17 +1,4 @@
-﻿using MigrationBot.Data;
-using MigrationBot.Models;
-using MigrationBot.Types;
-using Npgsql;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
-using static MigrationBot.Types.Enums;
+﻿
 
 namespace MigrationBot
 {
@@ -324,7 +311,7 @@ namespace MigrationBot
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
                 {
 
-                    using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                    using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
                     {
                         await conn.OpenAsync();
 
@@ -351,7 +338,7 @@ namespace MigrationBot
 
                         string insert = $"INSERT INTO \"{date.ToShortDateString()}\" (id,time,count) VALUES({j + 1},'{time}',{count});";
 
-                        using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                        using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
                         {
                             await conn.OpenAsync();
 
@@ -377,7 +364,7 @@ namespace MigrationBot
 
                 try
                 {
-                    using (var conn = new NpgsqlConnection(Strings.Tokens.SqlConnection))
+                    using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
                     {
                         await conn.OpenAsync();
 
@@ -417,6 +404,7 @@ namespace MigrationBot
 
         public static async void DropSheets()
         {
+            
             var gw = new GoogleSheetWorker();
             await gw.DropSheet();
         }
