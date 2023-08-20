@@ -52,7 +52,8 @@ namespace MigrationBot
 
                     await CallBackHandler(update, bot);
 
-                    await bot.DeleteMessageAsync(update.CallbackQuery.From.Id, update.CallbackQuery.Message.MessageId);
+                    if(!update.CallbackQuery.Data.Contains("Admin_answer"))
+                        await bot.DeleteMessageAsync(update.CallbackQuery.From.Id, update.CallbackQuery.Message.MessageId);
                 }
 
             }
@@ -64,7 +65,7 @@ namespace MigrationBot
 
             await bot.SendChatActionAsync(chatId, ChatAction.Typing);
 
-            await ComandExecutor.Execute(message_text, chatId, bot);
+            await ComandExecutor.Execute(message_text, chatId, bot, message);
 
         }
         private static async Task CallBackHandler(Update update, TelegramBotClient bot)

@@ -120,7 +120,6 @@ namespace MigrationBot.Types
             }
             using (MigroBotContext db = new MigroBotContext())
             {
-                Console.WriteLine(this.Date);
                 db.Entries.Remove(this.ConvertToSqlEnrty());
                 await db.SaveChangesAsync();
 

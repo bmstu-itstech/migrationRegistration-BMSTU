@@ -12,9 +12,6 @@ using MigrationBot.Types;
 
 var gw = new GoogleSheetWorker();
 
-DateOnly dt = new DateOnly(2023, 8, 22);
-await gw.CleanSheet(dt);
-
 while (true)
 {
     try

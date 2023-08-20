@@ -14,6 +14,8 @@ namespace MigrationBot
     internal class Bot
     {
         private static string token = Data.Strings.Tokens.BotToken;
+          internal static long Admin_Chat = 479020307;
+       //internal static long Admin_Chat = 477686161;
 
         private static TelegramBotClient bot = new TelegramBotClient(token);
 

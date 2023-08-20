@@ -129,7 +129,7 @@ namespace MigrationBot
             var resp = await request.ExecuteAsync();
 
 
-            foreach(var sheet in resp.Sheets)
+            foreach (var sheet in resp.Sheets)
             {
 
                 var delete_sheet = new DeleteSheetRequest();
@@ -148,11 +148,10 @@ namespace MigrationBot
                 var batchUpdateRequest =
                     service.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest, SpreadSheetId);
 
-                if(sheet.Properties.Title != "Не удаляй меня")
-                {
+                if (sheet.Properties.Title != "Не удаляй меня")
                     await batchUpdateRequest.ExecuteAsync();
 
-                }
+
 
             }
 

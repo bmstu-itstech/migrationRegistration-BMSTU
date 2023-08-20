@@ -9,12 +9,14 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bots.Types;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static MigrationBot.Types.Enums;
 
 namespace MigrationBot
 {
     internal class QueryExecutor
     {
+
         public static async Task Execute(string query, long chatId, TelegramBotClient bot)
         {
             MyUser user = await MyUser.GetUser(chatId);
@@ -31,6 +33,7 @@ namespace MigrationBot
                 else if (query == "Registration_End") await ProveRegistration(query, chatId, bot, user);
                 else if (query.Contains("МoveEntry")) await MoveEntry(user, bot, change_flag);
                 else if (query.Contains("RejectEntry")) await RejectEntry(user, bot);
+                else if (query.Contains("Admin_answer")) await Admin_answer(query, bot, user);
             }
             catch (Exception ex)
             {
@@ -45,7 +48,7 @@ namespace MigrationBot
 
             user.Country = (Countries)selection;
 
-          
+
 
             if (edit_flag)
             {
@@ -291,12 +294,22 @@ namespace MigrationBot
             {
                 await entry.UnEnroll(user);
 
-
-
                 await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.Contact_with_admin);
+
+                user.Comand = "ContactAdmin";
+                await user.Save();
             }
 
         }
+        private static async Task Admin_answer(string query,  TelegramBotClient bot, MyUser user)
+        {
+            long user_chat_id = long.Parse(query.Split(' ')[1]);
 
+            user.Comand = $"AdminAnswer {user_chat_id}";
+            await user.Save();
+
+            await bot.SendTextMessageAsync(user.ChatId, "Напишите ваш ответ пожалуйста");
+
+        }
     }
 }
