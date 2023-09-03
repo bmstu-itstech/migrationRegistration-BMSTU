@@ -7,7 +7,7 @@ namespace MigrationBot
         private static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
         private static readonly string ApplicationName = "baumanbot";
 
-        private static readonly string SpreadSheetId = Data.Strings.Tokens.GogleToken;
+        private static readonly string SpreadSheetId = Data.Strings.Tokens.GoogleToken;
 
 
         public SheetsService service;
@@ -32,11 +32,20 @@ namespace MigrationBot
         {
             await CleanSheet(date);
 
-            var range = $"{date.ToString()}!A:G";
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+            var range = $"{curr_date}.{date.Year}!A:G";
             var valueRange = new ValueRange();
 
             var user_entries = MyEntry.GetEntriesByDate(date);
-            Console.WriteLine(user_entries.Count);
+         
 
 
             List<object> header = new List<object> { "id", "ФИО (ru)", "ФИО (en)", "Дата прибытия", "Страна", "Услуга", "Время записи" };
@@ -77,7 +86,16 @@ namespace MigrationBot
 
         public async Task CleanSheet(DateOnly date)
         {
-            var range = $"{date.ToString()}!A:G";
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+            var range = $"{curr_date}.{date.Year}!A:G";
             var valueRange = new ValueRange();
 
             ClearValuesRequest request_body = new ClearValuesRequest();

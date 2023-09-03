@@ -24,10 +24,11 @@ namespace MigrationBot.Types
             VIZA,
             VIZA_INSURANCE,
             REGISTRATION,
-            YEAR_REGISTRATION,
+            RENEWAL_REGISTRATION,
             INSURANCE,
             DOCUMENTS,
-            ALL
+            ALL,
+            VISA_EXETENSIO
         }
 
         public static Dictionary<int ,string> Countries_byId = new Dictionary<int, string>() 
@@ -47,10 +48,11 @@ namespace MigrationBot.Types
             {0,"Виза" },
             {1,"Виза и страховка" },
             {2,"Регистрация (первичная) " },
-            {3,"Годовая регистрация" },
+            {3,"Продление регистрации" },
             {4,"Страховка" },
             {5,"Выдача документов" },
             {6,"Все услуги" },
+            { 7,"Продление визы"}
             
 
         };

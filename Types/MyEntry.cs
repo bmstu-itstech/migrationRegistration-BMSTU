@@ -14,7 +14,7 @@ namespace MigrationBot.Types
 
         public DateTime Date { get; set; }
 
-
+        public int Service { get; set; }
 
         public Task Add()
         {
@@ -64,10 +64,8 @@ namespace MigrationBot.Types
                 {
                     UserId = entry.UserId,
                     Date = (DateTime)entry.Date,
+                    Service = (int)entry.Service
                 };
-
-
-
 
             }
         }
@@ -77,7 +75,8 @@ namespace MigrationBot.Types
             return new Entry()
             {
                 UserId = UserId,
-                Date = Date
+                Date = Date,
+                Service = Service
             };
         }
         private static MyEntry ConvertFromSqlEnrty(Entry entry)
@@ -85,7 +84,8 @@ namespace MigrationBot.Types
             return new MyEntry()
             {
                 UserId = entry.UserId,
-                Date = (DateTime)entry.Date
+                Date = (DateTime)entry.Date,
+                Service = (int)entry.Service    
             };
         }
         public async Task Enroll(MyUser user)

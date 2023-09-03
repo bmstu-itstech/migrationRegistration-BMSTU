@@ -1,5 +1,8 @@
 ﻿
 
+
+using MigrationBot.Data;
+
 namespace MigrationBot
 {
     internal class ComandExecutor
@@ -9,14 +12,18 @@ namespace MigrationBot
         {
             return Task.Run(async () =>
             {
+
+               // message = Functions.ReconstructQuery(message);
+
+               // Console.WriteLine($"ХУЙ {message}");
                 MyUser user = await MyUser.GetUser(chatId);
                 try
                 {
-                    if (message == "/start") await Start(message, chatId, bot, user);
+                    if (message.Contains("/start")) await Start(message, chatId, bot, user);
                     else if ((bool)(user?.Comand?.Contains("Ask"))) await ExecuteSetters(message, chatId, bot, user);
                     else if (user.Comand.Contains("Change")) await ExecuteChangers(message, chatId, bot, user);
                     else if (message.Contains("/remove") && message.Contains("-r")) await Functions.RemoveEntryFor(long.Parse(message.Split(' ')[2]), bot);
-                    else if (user.Comand == "ContactAdmin") await ContactAdmin(message, bot, user, mess);
+                    else if (user.Comand.Contains("ContactAdmin")) await ContactAdmin(message, bot, user, mess);
                     else if (user.Comand.Contains("AdminAnswer")) await AdminAnswer(message, bot, user, mess);
                 }
                 catch (Exception ex)
@@ -71,7 +78,8 @@ namespace MigrationBot
 
         private static async Task Start(string message, long chatId, TelegramBotClient bot, MyUser user)
         {
-          
+
+
             bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.StartMessege);
 
             user.Comand = "AskFioRu";
@@ -138,50 +146,52 @@ namespace MigrationBot
         {
             try
             {
-                var arival_date = DateOnly.Parse(message);
+                message = message.Replace('/', '.');
+
+                int day = int.Parse(message.Split('.')[0]);
+                int moutn = int.Parse(message.Split('.')[1]);
+                int year = int.Parse(message.Split('.')[2]);
+                var arival_date = new DateOnly(year, moutn, day);
 
                 // Нельзя прибыть раньше, чем можно встать на миграционный учёт
-                var ts = DateTime.Now - arival_date.ToDateTime(new TimeOnly(0, 0, 0));
-                if (ts.Days > Functions.GetUserMaxDays(user))
+                var ts = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time")) - arival_date.ToDateTime(new TimeOnly(0, 0, 0));
+                Console.WriteLine(ts.Days - Functions.GetUserMaxDays(user, date: arival_date));
+
+
+                if (user.Service != Services.RENEWAL_REGISTRATION && user.Service!=Services.VISA_EXETENSIO && ts.Days > Functions.GetUserMaxDays(user))
                     throw new Exception();
 
                 user.ArrivalDate = arival_date;
                 user.Comand = "";
                 await user.Save();
 
-                if (edit_flag)
-                {
-                    var keybord = Functions.GenerateDateKeyBoard(user, 1);
+                var keybord = Functions.GenerateDateKeyBoard(user, 1);
 
-                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
-                }
-                else
-                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBoards.ServiceSelection);
+                await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.InputErorr);
             }
         }
         public static async Task AskCountryStr(string message, TelegramBotClient bot, MyUser user, bool edit_flag = false)
         {
             user.CountrStr = message;
-            user.Comand = "AskArivalDate";
-
             await user.Save();
 
             if (edit_flag)
             {
                 var keybord = Functions.GenerateDateKeyBoard(user, week_number: 1);
 
-                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskService, replyMarkup: keybord);
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskEntry, replyMarkup: keybord);
 
             }
             else
             {
-                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskArivalDate);
+                await bot.SendTextMessageAsync(user.ChatId, Data.Strings.Messeges.AskService,replyMarkup:KeyBoards.ServiceSelection);
 
             }
 
@@ -191,7 +201,7 @@ namespace MigrationBot
         private static async Task ContactAdmin(string message, TelegramBotClient bot, MyUser user, Telegram.Bot.Types.Message mess)
         {
             string builded_message = $"Отмена записи от @{mess.From.Username}\n" +
-                $"#{DateOnly.FromDateTime(DateTime.Now).ToString().Replace('.', '_')}\n" +
+                $"#{DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"))).ToString().Replace('.', '_')}\n" +
                 $"#{user.FioRu.Replace(' ', '_')}\n" +
                 $"#{user.ChatId}\n" +
                 $"--------------------------------------------------------" +

@@ -1,14 +1,12 @@
 ﻿
 global using MigrationBot;
 global using Npgsql;
-global using MigrationBot.Data;
 global using MigrationBot.Models;
 global using MigrationBot.Types;
 global using Google.Apis.Auth.OAuth2;
 global using Google.Apis.Services;
 global using Google.Apis.Sheets.v4;
 global using Google.Apis.Sheets.v4.Data;
-global using Microsoft.VisualBasic;
 global using System;
 global using System.Collections.Generic;
 global using System.Data;
@@ -28,6 +26,9 @@ global using Telegram.Bot.Polling;
 
 //Functions.DropSheets();
 
+//Functions.UpdateTable_Enroll_One_Place();
+
+//Functions.UpdateTable_UnEnroll_One_Place();
 while (true)
     {
         try

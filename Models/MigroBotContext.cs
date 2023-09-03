@@ -1,4 +1,7 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
 namespace MigrationBot.Models;
 
 public partial class MigroBotContext : DbContext
@@ -19,7 +22,6 @@ public partial class MigroBotContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql(Data.Strings.Tokens.SqlConnection);
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entry>(entity =>
@@ -32,6 +34,9 @@ public partial class MigroBotContext : DbContext
             entity.Property(e => e.Date)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("Date ");
+            entity.Property(e => e.Service)
+                .HasDefaultValueSql("'-1'::integer")
+                .HasColumnName("service");
 
             entity.HasOne(d => d.User).WithOne(p => p.EntryNavigation)
                 .HasForeignKey<Entry>(d => d.UserId)

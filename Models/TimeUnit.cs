@@ -14,7 +14,7 @@ namespace MigrationBot.Models
             }
         }
 
-        public static async Task<Dictionary<int, TimeUnit>> GetFreeEntries(DateOnly date)
+        public static async Task<Dictionary<int, TimeUnit>> GetFreeEntries(DateOnly date, Services service)
         {
             // Id, item
             // id - порядковый номер юнита в БД
@@ -22,7 +22,36 @@ namespace MigrationBot.Models
             Dictionary<int, TimeUnit> free_entries = new Dictionary<int, TimeUnit>();
 
             //Забираем только уже свободные юниты
-            string select = $"SELECT * FROM \"{date.ToString()}\" WHERE count < 3;";
+
+            //08/21/2023 mm/dd/yyyy -> dd:mm:yyyy
+
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+
+
+            string table_name = $"{curr_date}.{date.Year}";
+
+            if (service != Services.DOCUMENTS)
+            {
+                using (MigroBotContext db = new MigroBotContext())
+                {
+
+                    var entries = db.Entries.Where(entry => entry.Date.Value.Day == date.Day && entry.Date.Value.Month == date.Month).
+                    Where(entry => entry.Service != (int)Services.DOCUMENTS).ToList();
+
+                    if (entries.Count() >= 20)
+                        return free_entries;
+
+                }
+            }
+            string select = $"SELECT * FROM \"{table_name}\" WHERE count < 3;";
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
@@ -41,7 +70,6 @@ namespace MigrationBot.Models
                             time_item.Time = reader.GetString(1);
                             time_item.Count = reader.GetInt32(2);
 
-
                             free_entries.Add(time_item.Id, time_item);
 
                         }
@@ -54,9 +82,18 @@ namespace MigrationBot.Models
 
             return free_entries;
         }
-        public static async Task TookEntryPlace(DateOnly date,TimeSpan time)
+        public static async Task TookEntryPlace(DateOnly date, TimeSpan time)
         {
-            string update = $"UPDATE \"{date.ToString()}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+            string update = $"UPDATE \"{curr_date}.{date.Year}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
 
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
@@ -71,7 +108,16 @@ namespace MigrationBot.Models
         }
         public static async Task FreeEntryPlace(DateOnly date, TimeSpan time)
         {
-            string update = $"UPDATE \"{date.ToString()}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+            string update = $"UPDATE \"{curr_date}.{date.Year}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
@@ -84,9 +130,18 @@ namespace MigrationBot.Models
             }
         }
 
-        public static async Task<TimeUnit> GetTimeUnit(DateOnly date,TimeSpan time)
+        public static async Task<TimeUnit> GetTimeUnit(DateOnly date, TimeSpan time)
         {
-            string select = $"SELECT * FROM \"{date.ToString()}\" WHERE time = {time.ToString()}";
+            string curr_date = $"0{date.Day}.0{date.Month}";
+
+            if (date.Month >= 10 && date.Day >= 10)
+                curr_date = $"{date.Day}.{date.Month}";
+            if (date.Month >= 10 && !(date.Day >= 10))
+                curr_date = $"0{date.Day}.{date.Month}";
+            if (!(date.Month >= 10) && date.Day >= 10)
+                curr_date = $"{date.Day}.0{date.Month}";
+
+            string select = $"SELECT * FROM \"{curr_date}.{date.Year}\" WHERE time = {time.ToString()}";
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
