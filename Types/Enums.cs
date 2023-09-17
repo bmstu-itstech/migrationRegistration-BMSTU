@@ -28,7 +28,8 @@ namespace MigrationBot.Types
             INSURANCE,
             DOCUMENTS,
             ALL,
-            VISA_EXETENSIO
+            VISA_EXETENSIO,
+            PETITION
         }
 
         public static Dictionary<int ,string> Countries_byId = new Dictionary<int, string>() 
@@ -52,8 +53,8 @@ namespace MigrationBot.Types
             {4,"Страховка" },
             {5,"Выдача документов" },
             {6,"Все услуги" },
-            { 7,"Продление визы"}
-            
+            { 7,"Продление визы"},
+            { 8,"Ходатайство"}
 
         };
     }

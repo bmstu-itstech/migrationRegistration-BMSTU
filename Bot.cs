@@ -18,6 +18,8 @@ namespace MigrationBot
             Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
 
 
+
+
             while (true)
             {
                 try

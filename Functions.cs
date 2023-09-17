@@ -32,7 +32,7 @@ namespace MigrationBot
         private static int GetUserDays(MyUser user)
         {
 
-            if (user.Service == Services.RENEWAL_REGISTRATION || user.Service == Services.VISA_EXETENSIO)
+            if (user.Service == Services.RENEWAL_REGISTRATION || user.Service == Services.VISA_EXETENSIO || user.Service == Services.PETITION)
             {
                 return 10000;
             }
@@ -88,6 +88,8 @@ namespace MigrationBot
                 service_duration = 25;
             if (user.Service == Services.ALL)
                 service_duration = 45;
+            if (user.Service == Services.PETITION)
+                service_duration = 25;
 
             return service_duration;
         }
