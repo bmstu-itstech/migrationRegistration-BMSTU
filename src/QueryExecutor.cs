@@ -1,5 +1,4 @@
 ﻿
-using MigrationBot.Data;
 
 namespace MigrationBot
 {
@@ -74,7 +73,7 @@ namespace MigrationBot
                 await user.Save();
 
                 if (user.Country != Countries.OTHER)
-                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: KeyBoards.ServiceSelection);
+                    await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskService, replyMarkup: Data.KeyBoards.ServiceSelection);
                 else
                 {
                     await bot.SendTextMessageAsync(chatId, Data.Strings.Messeges.AskCountryStr);

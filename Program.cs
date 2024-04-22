@@ -20,20 +20,14 @@ global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
 global using Telegram.Bot.Polling;
 
-//Functions.CreateDateTables();
-//Functions.DropDateTables();
-//Functions.AppendSheets();
-
-//Functions.DropSheets();
-
-//Functions.UpdateTable_Enroll_One_Place();
-
-//Functions.UpdateTable_UnEnroll_One_Place();
+Functions.CreateDateTables();
+Console.WriteLine("Tables created");
+Functions.AppendSheets();
 while (true)
     {
         try
         {
-            await Bot.Start();
+            //await Bot.Start();
         }
         catch (Exception ex)
         {

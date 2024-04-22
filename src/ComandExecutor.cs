@@ -15,7 +15,6 @@ namespace MigrationBot
 
                // message = Functions.ReconstructQuery(message);
 
-               // Console.WriteLine($"ХУЙ {message}");
                 MyUser user = await MyUser.GetUser(chatId);
                 try
                 {

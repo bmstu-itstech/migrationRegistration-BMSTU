@@ -307,7 +307,7 @@ namespace MigrationBot
         {
             var date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
 
-            for (int i = 0; i < 90; i++)
+            for (int i = 0; i < 317; i++)
             {
 
 
@@ -406,7 +406,7 @@ namespace MigrationBot
         {
             var date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
 
-            for (int i = 0; i < 90; i++)
+            for (int i = 0; i < 317; i++)
             {
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
                 {
@@ -415,6 +415,8 @@ namespace MigrationBot
 
 
                     await gw.AddSheet(DateOnly.FromDateTime(date).ToString());
+                    await Task.Delay(1000);
+                    Console.WriteLine($"gw rest");
                 }
                 date = date.AddDays(1);
             }
@@ -516,9 +518,9 @@ namespace MigrationBot
 
 
                 var time = new TimeSpan(10, 0, 0);
-                var diner_start = new TimeSpan(12, 30, 0);
+                var diner_start = new TimeSpan(12, 10, 0);
                 var diner_end = new TimeSpan(13, 30, 0);
-
+                var end_of_day = new TimeSpan(17, 00, 0);
 
 
 
@@ -536,14 +538,23 @@ namespace MigrationBot
                     {
                         var size = new TimeSpan(0, 5, 0);
 
-                        int count = 0;
 
-                        if (time >= diner_start && time <= diner_end)
-                            count = 3;
+                        if ((time >= diner_start && time <= diner_end) || time >= end_of_day)
+                        {
 
+                            if (date > new DateTime(year: 2023, month: 11, day: 17))
+                                break;
 
-                        if (time >= end_of_worK_one_worker)
                             await TimeUnit.TookEntryPlace(DateOnly.FromDateTime(date), time);
+                            await TimeUnit.TookEntryPlace(DateOnly.FromDateTime(date), time);
+                            await TimeUnit.TookEntryPlace(DateOnly.FromDateTime(date), time);
+
+
+                        }
+
+
+
+
 
 
                         time = time.Add(size);

@@ -1,11 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MigrationBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace MigrationBot.Types
 {
     internal class MyEntry
@@ -30,7 +23,7 @@ namespace MigrationBot.Types
 
                         await db.SaveChangesAsync();
                     }
-                    catch (DbUpdateException)
+                    catch (DbUpdateException) 
                     {
 
 
@@ -54,7 +47,7 @@ namespace MigrationBot.Types
                 }
             });
         }
-        public static async Task<MyEntry> GetEntry(long user_id)
+        public static async Task<MyEntry> GetEntry(long user_id) 
         {
             using (MigroBotContext db = new MigroBotContext())
             {
