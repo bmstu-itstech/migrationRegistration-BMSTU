@@ -303,9 +303,9 @@ namespace MigrationBot
         }
 
 
-        public static async void CreateDateTables()
+        public static async void CreateDateTables(DateTime d)
         {
-            var date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
+            var date = TimeZoneInfo.ConvertTimeFromUtc(d, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
 
             for (int i = 0; i < 317; i++)
             {
@@ -370,9 +370,9 @@ namespace MigrationBot
             }
         }
 
-        public static async void DropDateTables()
+        public static async void DropDateTables(DateTime d)
         {
-            var date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
+            var date = TimeZoneInfo.ConvertTimeFromUtc(d, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
 
             for (int i = 0; i < 90; i++)
             {
@@ -402,16 +402,15 @@ namespace MigrationBot
 
         }
 
-        public static async void AppendSheets()
+        public static async void AppendSheets(DateTime d)
         {
-            var date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
+            var date = TimeZoneInfo.ConvertTimeFromUtc(d, TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
 
             for (int i = 0; i < 317; i++)
             {
                 if (date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday)
                 {
                     var gw = new GoogleSheetWorker();
-
 
 
                     await gw.AddSheet(DateOnly.FromDateTime(date).ToString());

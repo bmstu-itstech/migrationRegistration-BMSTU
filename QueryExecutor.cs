@@ -176,7 +176,7 @@ namespace MigrationBot
 
 
 
-            DateOnly selected_date = new DateOnly(2024, moutn, day);
+            DateOnly selected_date = new DateOnly(2023, moutn, day);
             int week_number = int.Parse(query.Split(' ')[2]);
 
             var keybord = Functions.GenerateHourSelectionKeyBoard(selected_date, week_number, edit_flag);

@@ -36,7 +36,7 @@ namespace MigrationBot.Models
 
 
 
-            string table_name = $"{curr_date}.{date.Year}";
+            string table_name = $"{curr_date.Replace(".","/")}/{date.Year}";
 
             if (service != Services.DOCUMENTS)
             {
@@ -93,7 +93,7 @@ namespace MigrationBot.Models
             if (!(date.Month >= 10) && date.Day >= 10)
                 curr_date = $"{date.Day}.0{date.Month}";
 
-            string update = $"UPDATE \"{curr_date}.{date.Year}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
+            string update = $"UPDATE \"{curr_date.Replace(".","/")}/{date.Year}\" SET count = count + 1 WHERE time = '{time.ToString()}'";
 
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
@@ -117,7 +117,7 @@ namespace MigrationBot.Models
             if (!(date.Month >= 10) && date.Day >= 10)
                 curr_date = $"{date.Day}.0{date.Month}";
 
-            string update = $"UPDATE \"{curr_date}.{date.Year}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
+            string update = $"UPDATE \"{curr_date.Replace(".","/")}/{date.Year}\" SET count = count - 1 WHERE time = '{time.ToString()}'";
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {
@@ -141,7 +141,7 @@ namespace MigrationBot.Models
             if (!(date.Month >= 10) && date.Day >= 10)
                 curr_date = $"{date.Day}.0{date.Month}";
 
-            string select = $"SELECT * FROM \"{curr_date}.{date.Year}\" WHERE time = {time.ToString()}";
+            string select = $"SELECT * FROM \"{curr_date.Replace(".", "/")}/{date.Year}\" WHERE time = {time.ToString()}";
 
             using (var conn = new NpgsqlConnection(Data.Strings.Tokens.SqlConnection))
             {

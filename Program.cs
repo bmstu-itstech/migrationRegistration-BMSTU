@@ -20,8 +20,11 @@ global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
 global using Telegram.Bot.Polling;
 
-Functions.CreateDateTables();
-Console.WriteLine("Tables created");
+var date = new DateTime(2024, 1, 1);
+Functions.DropDateTables(d: date);
+Console.WriteLine("Dropped");
+//Functions.CreateDateTables(d: date);
+//Console.WriteLine("Tables created");
 Functions.AppendSheets();
 while (true)
     {

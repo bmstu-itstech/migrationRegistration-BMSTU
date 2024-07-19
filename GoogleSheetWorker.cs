@@ -41,7 +41,7 @@ namespace MigrationBot
             if (!(date.Month >= 10) && date.Day >= 10)
                 curr_date = $"{date.Day}.0{date.Month}";
 
-            var range = $"{curr_date.Replace(".", "/")}/{date.Year}!A:G";
+            var range = $"{curr_date}.{date.Year}!A:G";
             var valueRange = new ValueRange();
 
             var user_entries = MyEntry.GetEntriesByDate(date);
@@ -95,7 +95,7 @@ namespace MigrationBot
             if (!(date.Month >= 10) && date.Day >= 10)
                 curr_date = $"{date.Day}.0{date.Month}";
 
-            var range = $"{curr_date.Replace(".","/")}/{date.Year}!A:G";
+            var range = $"{curr_date}.{date.Year}!A:G";
             var valueRange = new ValueRange();
 
             ClearValuesRequest request_body = new ClearValuesRequest();
